@@ -1,0 +1,41 @@
+{
+    "_moduleAliases": {
+        "@orm": "src/orm",
+        "@entities": "src/entities",
+        "@modules": "src/modules",
+        "@jobs": "src/jobs",
+        "@plugins": "src/plugins",
+        "@app": "src/"
+    },
+    "scripts": {
+        "dev": "nodemon src/index.ts",
+        "migrate": "npx mikro-orm-esm migration:create --config src/mikro-orm.config.ts",
+        "update": "npx mikro-orm-esm migration:up --config src/mikro-orm.config.ts"
+    },
+    "dependencies": {
+        "@fastify/autoload": "^6.3.0",
+        "@fastify/cors": "^11.0.1",
+        "@fastify/jwt": "^9.1.0",
+        "@fastify/multipart": "^9.0.3",
+        "@fastify/swagger": "^9.5.1",
+        "@fastify/swagger-ui": "^5.2.2",
+        "@fastify/type-provider-typebox": "^5.1.0",
+        "@mikro-orm/migrations": "^6.4.15",
+        "@mikro-orm/reflection": "^6.4.15",
+        "@mikro-orm/seeder": "^6.4.15",
+        "@mikro-orm/sqlite": "^6.4.15",
+        "@sinclair/typebox": "^0.34.33",
+        "argon2": "^0.43.0",
+        "chalk": "^5.4.1",
+        "dotenv": "^16.5.0",
+        "fastify": "^5.3.3",
+        "fastify-plugin": "^5.0.1",
+        "module-alias": "^2.2.3"
+    },
+    "devDependencies": {
+        "@mikro-orm/cli": "^6.4.15",
+        "nodemon": "^3.1.10",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.8.3"
+    }
+}
