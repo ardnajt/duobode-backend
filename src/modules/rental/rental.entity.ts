@@ -1,6 +1,12 @@
-import { Entity, ManyToOne, Property } from '@mikro-orm/sqlite';
+import { Embeddable, Embedded, Entity, Enum, ManyToOne, Property } from '@mikro-orm/sqlite';
 import { CommonEntity } from '@modules/common/common.entity';
 import { User } from '@modules/user/user.entity';
+import axios from 'axios';
+
+export enum RentalType {
+	ROOM = 0,
+	UNIT = 1
+}
 
 export enum PropertyType {
 	HDB = 0,
@@ -8,34 +14,78 @@ export enum PropertyType {
 	LANDED = 2
 }
 
-export enum StayDuration {
+export enum Duration {
 	SHORT_TERM = 0,
 	LONG_TERM = 1
 }
 
+export enum RentalState {
+	DRAFT = 0,
+	ACTIVE = 1,
+	INACTIVE = 2
+}
+
+@Embeddable()
+export class Location {
+	@Property()
+	postal?: string;
+
+	@Property()
+	latitude?: number;
+
+	@Property()
+	longitude?: number;
+
+	@Property()
+	district?: string;
+}
+
 @Entity()
 export default class Rental extends CommonEntity {
-	@ManyToOne(() => User)
+	@ManyToOne(() => User, { eager: true })
 	owner: User;
 
+	@Enum()
+	state: RentalState = RentalState.DRAFT;
+	
 	@Property()
-	type: PropertyType;
+	title?: string;
 
 	@Property()
-	stayDuration: StayDuration; 
+	description?: string;
 
 	@Property()
-	rent: number;
+	pax?: number;
+
+	@Enum()
+	type?: RentalType;
+
+	@Enum()
+	property?: PropertyType;
+
+	@Enum()
+	duration?: Duration; 
 
 	@Property()
-	postalCode: string;
+	rent?: number;
 
-	constructor(owner: User, type: PropertyType, stayDuration: StayDuration, rent: number, postalCode: string ) {
+	@Property()
+	furnished?: boolean;
+
+	@Embedded()
+	location?: Location;
+
+	constructor(owner: User) {
 		super();
 		this.owner = owner;
-		this.type = type;
-		this.stayDuration = stayDuration;
-		this.rent = rent;
-		this.postalCode = postalCode;
+	}
+
+	/** Utilises reverse geocoding to ensure that the provided `postal` matches with the `latitude` and `longitude`. */
+	async validateLocation(location: Omit<Location, 'district'>) {
+		const response = await axios.get<{ GeocodeInfo: { POSTALCODE: string }[] }>(`https://www.onemap.gov.sg/api/public/revgeocode?location=${location.latitude},${location.longitude}`, { headers: {
+			'Authorization': process.env.API_ONEMAP_ACCESS_KEY
+		}}).catch(() => null);
+
+		return !!response && response.data.GeocodeInfo.some(i => i.POSTALCODE == location.postal);
 	}
 }
