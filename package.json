@@ -26,6 +26,7 @@
         "@mikro-orm/sqlite": "^6.4.15",
         "@sinclair/typebox": "^0.34.33",
         "argon2": "^0.43.0",
+        "axios": "^1.9.0",
         "chalk": "^5.4.1",
         "dotenv": "^16.5.0",
         "fastify": "^5.3.3",
