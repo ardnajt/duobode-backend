@@ -1,7 +1,9 @@
-import { BeforeCreate, BeforeUpdate, Embeddable, Embedded, Entity, Enum, EventArgs, Property } from '@mikro-orm/sqlite';
+import { BeforeCreate, BeforeUpdate, Cascade, Collection, Embeddable, Embedded, Entity, Enum, EventArgs, OneToMany, Property } from '@mikro-orm/sqlite';
 import { CommonEntity } from '@modules/common/common.entity';
+import Rental from '@modules/rental/rental.entity';
 
 import { hash, verify } from 'argon2';
+import { FastifyInstance } from 'fastify';
 
 export enum TenantType {
 	MALE = 0,
@@ -15,6 +17,18 @@ export enum TenantOccupation {
 }
 
 @Embeddable()
+export class TenantPreferences {
+	@Property()
+	region?: string;
+
+	@Property()
+	district?: string;
+
+	@Property()
+	budget?: number;
+}
+
+@Embeddable()
 export class Tenant {
 	@Property()
 	pax?: number;
@@ -22,20 +36,19 @@ export class Tenant {
 	@Enum()	
 	type?: TenantType;
 
+	@Property()
+	bio?: string;
+
 	@Enum()
 	occupation?: TenantOccupation;
 
-	@Property()
-	preferredRegion?: string;
+	@Embedded()
+	preferred?: TenantPreferences;
+}
 
-	@Property()
-	preferredArea?: string;
-
-	@Property()
-	budgetMin?: number;
-
-	@Property()
-	budgetMax?: number;
+export enum Gender {
+	MALE = 0,
+	FEMALE = 1,
 }
 
 @Entity()
@@ -52,22 +65,29 @@ export class User extends CommonEntity<'bio'> {
 	@Property({ unique: true })
 	phone: string;
 
-	@Embedded()
-	tenant?: Tenant;
+	@Property()
+	verified: boolean = false;
 
 	@Property()
 	age: number;
 
-	@Property()
-	bio?: string;
+	@Enum(() => Gender)
+	gender: Gender;
+
+	@Embedded()
+	tenant?: Tenant;
+
+	@OneToMany(() => Rental, rental => rental.owner, { eager: true, cascade: [Cascade.ALL] })
+	rentals = new Collection<Rental>(this);
 	
-	constructor(name: string, email: string, password: string, phone: string, age: number) {
+	constructor(name: string, email: string, password: string, phone: string, age: number, gender: Gender) {
 		super();
 		this.name = name;
 		this.email = email;
 		this.password = password;
 		this.phone = phone;
 		this.age = age;
+		this.gender = gender;
 	}
 
 	@BeforeCreate()
@@ -80,5 +100,9 @@ export class User extends CommonEntity<'bio'> {
 	
 	async verifyPassword(password: string) {
 		return verify(this.password, password);
+	}
+
+	generateToken(app: FastifyInstance) {
+		return app.jwt.sign({ id: this.id, email: this.email });
 	}
 }

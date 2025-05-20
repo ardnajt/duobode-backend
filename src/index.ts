@@ -15,11 +15,17 @@ import { FastifyJwtNamespace } from '@fastify/jwt';
 
 const app = fastify({ logger: Boolean(process.env.SERVER_DEBUG) });
 
+declare module '@fastify/jwt' {
+	interface FastifyJWT {
+		user: { id: number, email: string };
+	}
+}
 declare module 'fastify' {
   interface FastifyInstance extends FastifyJwtNamespace<{ namespace: 'security' }> {
     authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }
 }
+
 
 async function bootstrap() {
 	app.register(fastifyCors, { origin: process.env.CORS_ORIGIN });
