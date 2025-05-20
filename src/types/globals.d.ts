@@ -10,5 +10,7 @@ declare namespace NodeJS {
 		DB_DEBUG: string;
 		DB_NAME: string;
 		DB_HOST: string;
+
+		API_ONEMAP_ACCESS_KEY: string;
   }
 }
