@@ -1,7 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { initORM } from '@orm';
-import { Gender, User } from './user.entity';
+import { User } from './user.entity';
 
 const route: FastifyPluginAsyncTypebox = async app => {
 	const db = await initORM();
@@ -14,14 +14,12 @@ const route: FastifyPluginAsyncTypebox = async app => {
 				email: Type.String({ examples: ["user@gmail.com"] }),
 				password: Type.String({ examples: ["password"] }),
 				phone: Type.String({ examples: ["81234567"] }),
-				age: Type.Number({ examples: ["21"] }),
-				gender: Type.Enum(Gender, { examples: [Gender.MALE] })
 			})
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
 
-		const user = new User(req.body.name, req.body.email, req.body.password, req.body.phone, req.body.age, req.body.gender);
+		const user = new User(req.body.name, req.body.email, req.body.password, req.body.phone);
 		await em.persistAndFlush(user);
 
 		const token = user.generateToken(app);

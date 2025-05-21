@@ -46,11 +46,6 @@ export class Tenant {
 	preferred?: TenantPreferences;
 }
 
-export enum Gender {
-	MALE = 0,
-	FEMALE = 1,
-}
-
 @Entity()
 export class User extends CommonEntity<'bio'> {
 	@Property()
@@ -68,26 +63,18 @@ export class User extends CommonEntity<'bio'> {
 	@Property()
 	verified: boolean = false;
 
-	@Property()
-	age: number;
-
-	@Enum(() => Gender)
-	gender: Gender;
-
 	@Embedded()
 	tenant?: Tenant;
 
 	@OneToMany(() => Rental, rental => rental.owner, { eager: true, cascade: [Cascade.ALL] })
 	rentals = new Collection<Rental>(this);
 	
-	constructor(name: string, email: string, password: string, phone: string, age: number, gender: Gender) {
+	constructor(name: string, email: string, password: string, phone: string) {
 		super();
 		this.name = name;
 		this.email = email;
 		this.password = password;
 		this.phone = phone;
-		this.age = age;
-		this.gender = gender;
 	}
 
 	@BeforeCreate()
