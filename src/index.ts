@@ -9,9 +9,13 @@ import fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
 import fastifyMultipart from '@fastify/multipart';
 import fastifyAutoload from '@fastify/autoload';
+
 import fastifySwaggerPlugin from '@plugins/swagger.plugin';
 import fastifyJwtPlugin from '@plugins/jwt.plugin';
+
 import { FastifyJwtNamespace } from '@fastify/jwt';
+import fastifyOauth2Plugin from '@plugins/oauth2.plugin';
+import { OAuth2Namespace } from '@fastify/oauth2';
 
 const app = fastify({ logger: Boolean(process.env.SERVER_DEBUG) });
 
@@ -23,6 +27,7 @@ declare module '@fastify/jwt' {
 declare module 'fastify' {
   interface FastifyInstance extends FastifyJwtNamespace<{ namespace: 'security' }> {
     authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+		GoogleOAuth2: OAuth2Namespace;
   }
 }
 
@@ -31,6 +36,7 @@ async function bootstrap() {
 	app.register(fastifyCors, { origin: process.env.CORS_ORIGIN });
 	app.register(fastifySwaggerPlugin);
 	app.register(fastifyJwtPlugin);
+	app.register(fastifyOauth2Plugin);
 	app.register(fastifyMultipart);
 	app.register(fastifyAutoload, {
 		dir: path.join(__dirname, 'modules'),

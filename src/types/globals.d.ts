@@ -11,6 +11,8 @@ declare namespace NodeJS {
 		DB_NAME: string;
 		DB_HOST: string;
 
+		API_OAUTH2_GOOGLE_CLIENT: string;
+		API_OAUTH2_GOOGLE_SECRET: string;
 		API_ONEMAP_ACCESS_KEY: string;
   }
 }
