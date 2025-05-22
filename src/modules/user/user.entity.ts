@@ -46,6 +46,12 @@ export class Tenant {
 	preferred?: TenantPreferences;
 }
 
+@Embeddable()
+export class Social {
+	@Property({ default: null })
+	googleId?: string;
+}
+
 @Entity()
 export class User extends CommonEntity {
 	@Property()
@@ -55,13 +61,10 @@ export class User extends CommonEntity {
 	email: string;
 	
 	@Property()
-	password: string;
+	password?: string;
 
-	@Property({ unique: true })
-	phone: string;
-
-	@Property()
-	verified: boolean = false;
+	@Embedded()
+	social?: Social;
 
 	@Embedded()
 	tenant?: Tenant;
@@ -69,12 +72,10 @@ export class User extends CommonEntity {
 	@OneToMany(() => Rental, rental => rental.owner, { eager: true, cascade: [Cascade.ALL] })
 	rentals = new Collection<Rental>(this);
 	
-	constructor(name: string, email: string, password: string, phone: string) {
+	constructor(name: string, email: string) {
 		super();
 		this.name = name;
 		this.email = email;
-		this.password = password;
-		this.phone = phone;
 	}
 
 	@BeforeCreate()
@@ -85,7 +86,9 @@ export class User extends CommonEntity {
 		if (password) this.password = await hash(password);
 	}
 	
+	/** Nullable only if social login methods were used. */
 	async verifyPassword(password: string) {
+		if (!this.password) return null;
 		return verify(this.password, password);
 	}
 

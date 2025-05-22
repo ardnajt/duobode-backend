@@ -19,7 +19,8 @@ const route: FastifyPluginAsyncTypebox = async app => {
 	}, async (req, res) => {
 		const em = db.em.fork();
 
-		const user = new User(req.body.name, req.body.email, req.body.password, req.body.phone);
+		const user = new User(req.body.name, req.body.email);
+		user.password = req.body.password;
 		await em.persistAndFlush(user);
 
 		const token = user.generateToken(app);
