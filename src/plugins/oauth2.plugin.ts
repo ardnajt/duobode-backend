@@ -14,7 +14,7 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 			auth: fastifyOauth2.GOOGLE_CONFIGURATION,
 		},
 		startRedirectPath: '/oauth2/google',
-		callbackUri: `http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT}/oauth2/google/callback`
+		callbackUri: `http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT}${process.env.API_OAUTH2_GOOGLE_CALLBACK_URI}`
 	});
 
 	// Example of reading the access token.
@@ -29,7 +29,7 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 	});
 
 	// Endpoint to retrieve token on server-side on successful login.
-	app.get('/oauth2/google/callback', async (req, res) => {
+	app.get(process.env.API_OAUTH2_GOOGLE_CALLBACK_URI, async (req, res) => {
 		const { token } = await app.GoogleOAuth2.getAccessTokenFromAuthorizationCodeFlow(req);
 		res.redirect(`http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT}/?access_token=${token.access_token}`);
 	});
