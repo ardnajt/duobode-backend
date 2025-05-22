@@ -10,10 +10,9 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		schema: {
 			tags: ['user'],
 			body: Type.Object({
-				name: Type.String({ examples: ["John Doe"] }),
-				email: Type.String({ examples: ["user@gmail.com"] }),
-				password: Type.String({ examples: ["password"] }),
-				phone: Type.String({ examples: ["81234567"] }),
+				name: Type.String({ examples: ['John Doe'] }),
+				email: Type.String({ examples: ['johndoe@gmail.com'] }),
+				password: Type.String({ examples: ['password'] })
 			})
 		}
 	}, async (req, res) => {
@@ -31,8 +30,8 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		schema: {
 			tags: ['user'],
 			body: Type.Object({
-				email: Type.String({ examples: ["user@gmail.com"] }),
-				password: Type.String({ examples: ["password"] })
+				email: Type.String({ examples: ['johndoe@gmail.com'] }),
+				password: Type.String({ examples: ['password'] })
 			})
 		}
 	}, async (req, res) => {
