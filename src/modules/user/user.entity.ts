@@ -47,7 +47,7 @@ export class Tenant {
 }
 
 @Entity()
-export class User extends CommonEntity<'bio'> {
+export class User extends CommonEntity {
 	@Property()
 	name: string;
 
