@@ -48,7 +48,7 @@ export class Tenant {
 
 @Embeddable()
 export class Social {
-	@Property({ default: null })
+	@Property()
 	googleId?: string;
 }
 
