@@ -31,6 +31,7 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 	 * - If a user exists with the same email but a different linked social ID, it returns an account conflict error.
 	 * - If no user exists with the email, it attempts to find or create a user using the provided social ID.
 	 * - If found or created successfully, a token is generated and returned.
+	 * - Redirects back to a provided route with the token automatically set as its cookie.
 	 *
 	 * @param reply - Fastify reply object used for sending error responses.
 	 * @param key - The social provider key (e.g., 'googleId', 'facebookId').
@@ -39,7 +40,7 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 	 * @param name - The display name of the user from the social provider.
 	 * @returns A signed token for the authenticated user, or an error response.
 	 */
-	async function retrieveToken(reply: FastifyReply, key: keyof Social, id: string, email: string, name: string) {
+	async function handleUserLogin(reply: FastifyReply, key: keyof Social, id: string, email: string, name: string) {
 		const em = db.em.fork();
 
 		// Check if there's an account with the provided social's email.
@@ -62,7 +63,14 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 			}
 		}
 
-		return user.generateToken(app);
+		const token = user.generateToken(app);
+		
+		reply.setCookie('token', token, {
+			httpOnly: true,
+			secure: true,
+			sameSite: 'lax',
+			path: '/'
+		}).redirect(process.env.CLIENT_URL);
 	}
 
 	// #region Google
@@ -85,9 +93,7 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 	app.get(`${process.env.API_OAUTH2_GOOGLE_REDIRECT}/callback`, { schema: { hide: true } }, async (req, res) => {
 		const { token: authorisation } = await app.GoogleOAuth2.getAccessTokenFromAuthorizationCodeFlow(req);
 		const info = await app.GoogleOAuth2.userinfo(authorisation.access_token) as { sub: string, email: string, picture: string, name: string };
-
-		const token = await retrieveToken(res, 'googleId', info.sub, info.email, info.name);
-		console.log(token);
+		await handleUserLogin(res, 'googleId', info.sub, info.email, info.name);
 	});
 	// #endregion
 
@@ -109,9 +115,7 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 	app.get(`${process.env.API_OAUTH2_FACEBOOK_REDIRECT}/callback`, { schema: { hide: true } }, async (req, res) => {
 		const { token: authorisation } = await app.FacebookOAuth2.getAccessTokenFromAuthorizationCodeFlow(req);
 		const response = await axios.get<{ name: string, email: string, id: string }>('https://graph.facebook.com/me', { params: { access_token: authorisation.access_token, fields: 'name,email' } });
-
-		const token = await retrieveToken(res, 'facebookId', response.data.id, response.data.email, response.data.name);
-		console.log(token);
+		await handleUserLogin(res, 'facebookId', response.data.id, response.data.email, response.data.name);
 	});
 	// #endregion
 });
