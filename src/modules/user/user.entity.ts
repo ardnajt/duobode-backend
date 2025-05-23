@@ -21,7 +21,7 @@ export class User extends CommonEntity {
 	email: string;
 
 	@Property()
-	name?: string;
+	name: string;
 	
 	@Property()
 	password?: string;
@@ -35,9 +35,10 @@ export class User extends CommonEntity {
 	@OneToMany(() => Rental, rental => rental.owner, { eager: true, cascade: [Cascade.ALL] })
 	rentals = new Collection<Rental>(this);
 	
-	constructor(email: string) {
+	constructor(email: string, name: string) {
 		super();
 		this.email = email;
+		this.name = name;
 	}
 
 	@BeforeCreate()
