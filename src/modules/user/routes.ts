@@ -6,9 +6,25 @@ import { User } from './user.entity';
 const route: FastifyPluginAsyncTypebox = async app => {
 	const db = await initORM();
 
-	app.get('', async () => {
+	app.get('', {
+		onRequest: [app.authenticate],
+		schema: {
+			tags: ['user'],
+			security: [{ BearerAuth: [] }]
+		}
+	}, async (req, res) => {
 		const em = db.em.fork();
-		return await em.findAll(User);
+		return await em.findOneOrFail(User, req.user.id);
+	});
+
+	app.get('/:id', {
+		schema: {
+			tags: ['user'],
+			params: Type.Object({ id: Type.Number() })
+		}
+	}, async (req, res) => {
+		const em = db.em.fork();
+		return await em.findOne(User, req.params.id);
 	});
 
 	app.post('/register', {
