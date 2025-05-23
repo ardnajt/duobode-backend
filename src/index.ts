@@ -28,6 +28,7 @@ declare module 'fastify' {
   interface FastifyInstance extends FastifyJwtNamespace<{ namespace: 'security' }> {
     authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
 		GoogleOAuth2: OAuth2Namespace;
+		FacebookOAuth2: OAuth2Namespace;
   }
 }
 

@@ -10,6 +10,9 @@ import { FastifyInstance } from 'fastify';
 export class Social {
 	@Property()
 	googleId?: string;
+
+	@Property()
+	facebookId?: string;
 }
 
 @Entity()
