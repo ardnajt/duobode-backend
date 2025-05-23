@@ -1,6 +1,6 @@
 declare namespace NodeJS {
-  interface ProcessEnv {
-    CORS_ORIGIN: string;
+	interface ProcessEnv {
+		CORS_ORIGIN: string;
 
 		SECRET_KEY: string;
 		SERVER_DEBUG: string;
@@ -15,6 +15,10 @@ declare namespace NodeJS {
 
 		API_OAUTH2_GOOGLE_CLIENT: string;
 		API_OAUTH2_GOOGLE_SECRET: string;
-		API_OAUTH2_GOOGLE_CALLBACK_URI: string;
+		API_OAUTH2_GOOGLE_REDIRECT: string;
+
+		API_OAUTH2_FACEBOOK_CLIENT: string;
+		API_OAUTH2_FACEBOOK_SECRET: string;
+		API_OAUTH2_FACEBOOK_REDIRECT: string;
   }
 }
