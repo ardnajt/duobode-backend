@@ -5,6 +5,7 @@ import { User } from './user.entity';
 
 const route: FastifyPluginAsyncTypebox = async app => {
 	const db = await initORM();
+	const exclude = ['password'] as const;
 
 	app.get('', {
 		onRequest: [app.authenticate],
@@ -14,7 +15,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
-		return await em.findOneOrFail(User, req.user.id);
+		return await em.findOneOrFail(User, req.user.id, { exclude });
 	});
 
 	app.get('/:id', {
@@ -24,13 +25,13 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
-		return await em.findOne(User, req.params.id);
+		return await em.findOne(User, req.params.id, { exclude });
 	});
 
 	app.post('/register', {
 		schema: {
 			tags: ['user'],
-			body: Type.Object({ 
+			body: Type.Object({
 				email: Type.String({ examples: ['johndoe@gmail.com'] }),
 				password: Type.String({ examples: ['password'] }),
 				name: Type.String({ examples: ['John Doe'] })
