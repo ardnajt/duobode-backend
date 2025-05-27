@@ -27,6 +27,17 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		const em = db.em.fork();
 		return await em.findOne(User, req.params.id, { exclude });
 	});
+	
+	app.get('/email-used/:email', {
+		schema: {
+			tags: ['user'],
+			params: Type.Object({ email: Type.String() })
+		}
+	}, async (req, res) => {
+		const em = db.em.fork();
+		const user = await em.findOne(User, { email: req.params.email });
+		return !!user ? true : false;
+	});
 
 	app.post('/register', {
 		onRequest: [app.authenticate],
