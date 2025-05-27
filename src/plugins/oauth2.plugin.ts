@@ -54,8 +54,7 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 			user = await em.findOne(User, { social });
 			// If no account can be found, create a new account.
 			if (!user) {
-				user = new User(email);
-				user.name = name;
+				user = new User(email, name);
 				user.social = social;
 				user.password = generatePassword();
 				await em.persistAndFlush(user);

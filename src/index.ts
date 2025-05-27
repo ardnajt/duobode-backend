@@ -12,9 +12,9 @@ import fastifyAutoload from '@fastify/autoload';
 
 import fastifySwaggerPlugin from '@plugins/swagger.plugin';
 import fastifyJwtPlugin from '@plugins/jwt.plugin';
+import fastifyOauth2Plugin from '@plugins/oauth2.plugin';
 
 import { FastifyJwtNamespace } from '@fastify/jwt';
-import fastifyOauth2Plugin from '@plugins/oauth2.plugin';
 import { OAuth2Namespace } from '@fastify/oauth2';
 
 const app = fastify({ logger: Boolean(process.env.SERVER_DEBUG) });

@@ -29,18 +29,19 @@ const route: FastifyPluginAsyncTypebox = async app => {
 	});
 
 	app.post('/register', {
+		onRequest: [app.authenticate],
 		schema: {
 			tags: ['user'],
+			security: [{ BearerAuth: [] }],
 			body: Type.Object({
-				email: Type.String({ examples: ['johndoe@gmail.com'] }),
+				name: Type.String({ examples: ['John Doe'] }),
 				password: Type.String({ examples: ['password'] }),
-				name: Type.String({ examples: ['John Doe'] })
 			})
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
 
-		const user = new User(req.body.email, req.body.name);
+		const user = new User(req.user.email, req.body.name);
 		user.password = req.body.password;
 		await em.persistAndFlush(user);
 
