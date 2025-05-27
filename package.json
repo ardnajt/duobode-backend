@@ -32,10 +32,12 @@
         "dotenv": "^16.5.0",
         "fastify": "^5.3.3",
         "fastify-plugin": "^5.0.1",
-        "module-alias": "^2.2.3"
+        "module-alias": "^2.2.3",
+        "nodemailer": "^7.0.3"
     },
     "devDependencies": {
         "@mikro-orm/cli": "^6.4.15",
+        "@types/nodemailer": "^6.4.17",
         "nodemon": "^3.1.10",
         "ts-node": "^10.9.2",
         "typescript": "^5.8.3"
