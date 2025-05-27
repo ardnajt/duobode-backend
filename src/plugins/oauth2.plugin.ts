@@ -54,7 +54,8 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 			user = await em.findOne(User, { social });
 			// If no account can be found, create a new account.
 			if (!user) {
-				user = new User(email, name);
+				user = new User(email);
+				user.name = name;
 				user.social = social;
 				user.password = generatePassword();
 				await em.persistAndFlush(user);
@@ -88,7 +89,7 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 		callbackUri: `http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT}/oauth2/google/callback`
 	});
 
-	app.get(`${process.env.API_OAUTH2_GOOGLE_REDIRECT}/callback`, { schema: { hide: true } }, async (req, res) => {
+	app.get(`/oauth2/google/callback`, { schema: { hide: true } }, async (req, res) => {
 		const { token: authorisation } = await app.GoogleOAuth2.getAccessTokenFromAuthorizationCodeFlow(req);
 		const info = await app.GoogleOAuth2.userinfo(authorisation.access_token) as { sub: string, email: string, picture: string, name: string };
 		await handleUserLogin(res, 'googleId', info.sub, info.email, info.name);
@@ -110,7 +111,7 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 		callbackUri: `http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT}/oauth2/facebook/callback`
 	});
 
-	app.get(`${process.env.API_OAUTH2_FACEBOOK_REDIRECT}/callback`, { schema: { hide: true } }, async (req, res) => {
+	app.get(`/oauth2/facebook/callback`, { schema: { hide: true } }, async (req, res) => {
 		const { token: authorisation } = await app.FacebookOAuth2.getAccessTokenFromAuthorizationCodeFlow(req);
 		const response = await axios.get<{ name: string, email: string, id: string }>('https://graph.facebook.com/me', { params: { access_token: authorisation.access_token, fields: 'name,email' } });
 		await handleUserLogin(res, 'facebookId', response.data.id, response.data.email, response.data.name);
