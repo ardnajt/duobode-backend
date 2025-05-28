@@ -2,6 +2,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { initORM } from '@orm';
 import { Type } from '@sinclair/typebox';
 import { Otp } from './otp.entity';
+import dayjs from 'dayjs';
 import nodemailer from 'nodemailer';
 
 const route: FastifyPluginAsyncTypebox = async app => {
@@ -57,10 +58,10 @@ const route: FastifyPluginAsyncTypebox = async app => {
 	}, async (req, res) => {
 		const em = db.em.fork();
 
-		const otp = await em.findOne(Otp, { email: req.body.email }, { orderBy: { createdTimestamp: 'DESC' } });
+		const otp = await em.findOne(Otp, { email: req.body.email }, { orderBy: { createdAt: 'DESC' } });
 		if (!otp) return res.status(404).send({ message: 'Email not found.' });
 		if (otp.code !== req.body.code) return res.status(401).send({ message: 'Invalid code.' });
-		if (otp.expirationTimestamp < Date.now()) return res.status(401).send({ message: 'Code expired.' });
+		if (dayjs().isAfter(otp.expiredAt)) return res.status(401).send({ message: 'Code expired.' });
 
 		await em.removeAndFlush(otp);
 		// Temporarily creatres a JWT token which stores the email for registration.

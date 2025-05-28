@@ -2,7 +2,7 @@ import { OptionalProps, PrimaryKey, Property } from '@mikro-orm/sqlite';
 
 /**
  * CommonEntity is a base class for all entities in the application.
- * It has predetermined properties such as `id`, `createdTimestamp`, and `updatedTimestamp`.
+ * It has predetermined properties such as `id`, `createdAt`, and `updatedAt`.
  * 
  * You may state optional properties when extending this class by passing a string literal type.
  * 
@@ -20,8 +20,8 @@ export abstract class CommonEntity<Optional = never> {
 	id!: number;
 
 	@Property()
-	createdTimestamp = new Date().getTime();
+	createdAt: Date = new Date();
 
-	@Property({ onUpdate: () => new Date().getTime() })
-	updatedTimestamp = new Date().getTime();
+	@Property({ onUpdate: () => new Date() })
+	updatedAt: Date = new Date();
 }

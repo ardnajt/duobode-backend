@@ -5,6 +5,6 @@ let cache: MikroORM;
 
 export async function initORM() {
   if (cache) return cache;
-  const orm = await MikroORM.init(config);
+  const orm = await MikroORM.init(config as any);
   return cache = orm;
 }
