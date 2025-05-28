@@ -17,7 +17,10 @@ import fastifyOauth2Plugin from '@plugins/oauth2.plugin';
 import { FastifyJwtNamespace } from '@fastify/jwt';
 import { OAuth2Namespace } from '@fastify/oauth2';
 
-const app = fastify({ logger: Boolean(process.env.SERVER_DEBUG) });
+const app = fastify({ 
+	logger: Boolean(process.env.SERVER_DEBUG),
+	pluginTimeout: 0
+});
 
 declare module '@fastify/jwt' {
 	interface FastifyJWT {
@@ -47,7 +50,7 @@ async function bootstrap() {
 	await app.ready();
 	app.swagger();
 
-	app.listen({ host: process.env.SERVER_HOST, port: Number(process.env.SERVER_PORT) }, (err, address) => {
+	app.listen({ host: process.env.SERVER_HOST ?? '0.0.0.0', port: Number(process.env.SERVER_PORT) ?? 3000 }, (err, address) => {
 		if (err) {
 			app.log.error(err);
 			process.exit(1);
