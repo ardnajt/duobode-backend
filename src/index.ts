@@ -37,7 +37,7 @@ declare module 'fastify' {
 
 
 async function bootstrap() {
-	app.register(fastifyCors, { origin: process.env.CORS_ORIGIN });
+	app.register(fastifyCors, { origin: process.env.CORS });
 	app.register(fastifySwaggerPlugin);
 	app.register(fastifyJwtPlugin);
 	app.register(fastifyOauth2Plugin);

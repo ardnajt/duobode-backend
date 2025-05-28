@@ -1,12 +1,12 @@
 declare namespace NodeJS {
 	interface ProcessEnv {
-		HOST: string;
 		PORT: string;
-		CORS_ORIGIN: string;
+		SERVER_URL: string;
+		WEBSITE_URL: string;
 
+		CORS: string;
 		DEBUG: string;
 		SECRET_KEY: string;
-		CLIENT_URL: string;
 
 		DB_DEBUG: string;
 		DB_DRIVER: 'mysql' | 'mariadb' | 'sqlite';
