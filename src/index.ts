@@ -50,12 +50,12 @@ async function bootstrap() {
 	await app.ready();
 	app.swagger();
 
-	app.listen({ host: '0.0.0.0', port: Number(process.env.PORT) ?? 3000 }, (err, address) => {
+	app.listen({ host: '0.0.0.0', port: Number(process.env.PORT) ?? 3000 }, (err) => {
 		if (err) {
 			app.log.error(err);
 			process.exit(1);
 		}
-		else console.log(`Visit ${chalk.green(`${address}/docs`)} for API documentation.`);
+		else console.log(`Visit ${chalk.green(`${process.env.SERVER_URL}/docs`)} for API documentation.`);
 	});
 }
 
