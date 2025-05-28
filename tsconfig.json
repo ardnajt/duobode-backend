@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES6",
+    "declaration": true,
     "experimentalDecorators": true,
     "module": "CommonJS",
     "baseUrl": "./src",
@@ -13,6 +14,7 @@
       "@app": ["src/index.ts"]
     },
     "outDir": "./dist",
+    "rootDir": "./src",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,

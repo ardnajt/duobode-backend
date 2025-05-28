@@ -1,3 +1,4 @@
+dist/
 database/
 src/migrations/
 node_modules/

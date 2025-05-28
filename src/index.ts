@@ -41,7 +41,7 @@ async function bootstrap() {
 	app.register(fastifyMultipart);
 	app.register(fastifyAutoload, {
 		dir: path.join(__dirname, 'modules'),
-		matchFilter: file => file.endsWith('routes.ts')
+		matchFilter: file => file.includes('routes.')
 	});
 
 	await app.ready();

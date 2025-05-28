@@ -1,14 +1,16 @@
 {
     "_moduleAliases": {
-        "@orm": "src/orm",
-        "@entities": "src/entities",
-        "@modules": "src/modules",
-        "@jobs": "src/jobs",
-        "@plugins": "src/plugins",
-        "@app": "src/"
+        "@orm": "dist/orm",
+        "@entities": "dist/entities",
+        "@modules": "dist/modules",
+        "@jobs": "dist/jobs",
+        "@plugins": "dist/plugins",
+        "@app": "dist/"
     },
     "scripts": {
         "dev": "nodemon src/index.ts",
+        "build": "tsc",
+        "prod": "node dist/index.js",
         "migrate": "npx mikro-orm-esm migration:create --config src/mikro-orm.config.ts",
         "update": "npx mikro-orm-esm migration:up --config src/mikro-orm.config.ts"
     },
