@@ -9,8 +9,12 @@ declare namespace NodeJS {
 		SERVER_PORT: string;
 
 		DB_DEBUG: string;
+		DB_DRIVER: 'mysql' | 'sqlite';
 		DB_NAME: string;
 		DB_HOST: string;
+		DB_PORT: string;
+		DB_USER: string;
+		DB_PASS: string;
 
 		EMAIL_AUTH_USER: string;
 		EMAIL_AUTH_PASS: string;
