@@ -85,7 +85,7 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 			issuer: 'https://accounts.google.com'
 		},
 		startRedirectPath: '/oauth2/google',
-		callbackUri: `http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT}/oauth2/google/callback`
+		callbackUri: `http://${process.env.HOST}:${process.env.PORT}/oauth2/google/callback`
 	});
 
 	app.get(`/oauth2/google/callback`, { schema: { hide: true } }, async (req, res) => {
@@ -107,7 +107,7 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 			auth: fastifyOauth2.FACEBOOK_CONFIGURATION
 		},
 		startRedirectPath: '/oauth2/facebook',
-		callbackUri: `http://${process.env.SERVER_HOST}:${process.env.SERVER_PORT}/oauth2/facebook/callback`
+		callbackUri: `http://${process.env.HOST}:${process.env.PORT}/oauth2/facebook/callback`
 	});
 
 	app.get(`/oauth2/facebook/callback`, { schema: { hide: true } }, async (req, res) => {
