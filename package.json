@@ -10,7 +10,7 @@
     "scripts": {
         "dev": "nodemon src/index.ts",
         "build": "tsc",
-        "prod": "node dist/index.js",
+        "start": "node dist/index.js",
         "migrate": "npx mikro-orm-esm migration:create --config src/mikro-orm.config.ts",
         "update": "npx mikro-orm-esm migration:up --config src/mikro-orm.config.ts"
     },
