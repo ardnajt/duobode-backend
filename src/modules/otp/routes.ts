@@ -35,12 +35,11 @@ const route: FastifyPluginAsyncTypebox = async app => {
 			from: `"Homerent" <${process.env.EMAIL_AUTH_USER}>`,
 			to: req.body.email,
 			subject: `${otp.code} Verification Code from Homerent`,
-			text: `
-			Please enter the following code to verify your email address: **${otp.code}**.
-			This code will expire in 5 minutes. For security reasons, please do not reveal this code to anyone.
-
-			Thanks,
-			Team Homerent
+			html: `
+			<h2>Your Verification Code</h2>
+			<p>Please enter the following to verify your email address: <span style="font-weight:bold;">${otp.code}</span></p>
+			<p>This code will expire in 5 minutes. For security reasons, please do not reveal this code to anyone.</p>
+			<p>Thanks,<br />Team Homerent</p>
 			`
 		});
 
