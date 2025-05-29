@@ -47,6 +47,14 @@ async function bootstrap() {
 		matchFilter: file => file.includes('routes.')
 	});
 
+	app.get('/', {
+		schema: {
+			hide: true
+		}
+	}, async (_, res) => {
+		res.redirect('/docs');
+	});
+
 	await app.ready();
 	app.swagger();
 
@@ -55,7 +63,7 @@ async function bootstrap() {
 			app.log.error(err);
 			process.exit(1);
 		}
-		else console.log(`Visit ${chalk.green(`${process.env.SERVER_URL}:${process.env.PORT}/docs`)} for API documentation.`);
+		else console.log(`Visit ${chalk.green(`${process.env.SERVER_URL}/docs`)} for API documentation.`);
 	});
 }
 

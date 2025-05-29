@@ -7,10 +7,9 @@ import { SeedManager } from '@mikro-orm/seeder';
 
 import { MySqlDriver } from '@mikro-orm/mysql';
 import { SqliteDriver } from '@mikro-orm/sqlite';
-import { MariaDbDriver } from '@mikro-orm/mariadb';
 
 const config = {
-	driver: process.env.DB_DRIVER == 'sqlite' ? SqliteDriver : process.env.DB_DRIVER == 'mariadb' ? MariaDbDriver : MySqlDriver,
+	driver: process.env.DB_DRIVER == 'sqlite' ? SqliteDriver : MySqlDriver,
 	extensions: [SeedManager, Migrator],
 	metadataProvider: TsMorphMetadataProvider,
 	debug: Boolean(process.env.DB_DEBUG),

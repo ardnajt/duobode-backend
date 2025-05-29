@@ -9,7 +9,7 @@ declare namespace NodeJS {
 		SECRET_KEY: string;
 
 		DB_DEBUG: string;
-		DB_DRIVER: 'mysql' | 'mariadb' | 'sqlite';
+		DB_DRIVER: 'mysql' | 'sqlite';
 		DB_NAME: string;
 		DB_HOST: string;
 		DB_PORT: string;
