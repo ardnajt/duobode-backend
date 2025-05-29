@@ -1,6 +1,6 @@
 dist/
 database/
-src/migrations/
+migrations/
 node_modules/
 temp/
 .env
