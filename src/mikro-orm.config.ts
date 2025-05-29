@@ -20,7 +20,11 @@ const config = {
 	user: process.env.DB_USER,
 	password: process.env.DB_PASS,
 	entities: ['dist/**/*.entity.js'],
-	entitiesTs: ['src/**/*.entity.ts']
+	entitiesTs: ['src/**/*.entity.ts'],
+	migrations: {
+		path: 'migrations',
+		pathTs: 'migrations'
+	}
 };
 
 export default config;

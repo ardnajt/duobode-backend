@@ -55,7 +55,7 @@ async function bootstrap() {
 			app.log.error(err);
 			process.exit(1);
 		}
-		else console.log(`Visit ${chalk.green(`${process.env.SERVER_URL}`)} for API documentation.`);
+		else console.log(`Visit ${chalk.green(`${process.env.SERVER_URL}/docs`)} for API documentation.`);
 	});
 }
 

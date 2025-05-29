@@ -16,7 +16,7 @@ const fastifySwaggerPlugin = fastifyPlugin(async app => {
 			}
 		}
 	});
-	app.register(fastifySwaggerUi, { routePrefix: '/' });
+	app.register(fastifySwaggerUi, { routePrefix: '/docs' });
 });
 
 export default fastifySwaggerPlugin;
