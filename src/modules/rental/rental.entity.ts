@@ -4,25 +4,25 @@ import { User } from '@modules/user/user.entity';
 import axios from 'axios';
 
 export enum RentalType {
-	ROOM = 0,
-	UNIT = 1
+	ROOM = 'room',
+	UNIT = 'unit'
 }
 
 export enum PropertyType {
-	HDB = 0,
-	CONDO = 1,
-	LANDED = 2
+	HDB = 'hdb',
+	CONDO = 'condo',
+	LANDED = 'landed'
 }
 
 export enum Duration {
-	SHORT_TERM = 0,
-	LONG_TERM = 1
+	SHORT_TERM = 'short',
+	LONG_TERM = 'long'
 }
 
 export enum RentalState {
-	DRAFT = 0,
-	ACTIVE = 1,
-	INACTIVE = 2
+	DRAFT = 'draft',
+	ACTIVE = 'active',
+	INACTIVE = 'inactive'
 }
 
 @Embeddable()

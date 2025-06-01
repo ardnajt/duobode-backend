@@ -3,14 +3,14 @@ import { CommonEntity } from '@modules/common/common.entity';
 import { User } from '@modules/user/user.entity';
 
 export enum TenantType {
-	MALE = 0,
-	FEMALE = 1,
-	COUPLE = 2
+	MALE = 'male',
+	FEMALE = 'female',
+	COUPLE = 'couple'
 }
 
 export enum TenantOccupation {
-	PROFESSIONAL = 0,
-	STUDENT = 1
+	PROFESSIONAL = 'professional',
+	STUDENT = 'student'
 }
 
 @Embeddable()
