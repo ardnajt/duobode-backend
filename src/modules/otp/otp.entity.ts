@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 @Entity()
 export class Otp extends CommonEntity {
 	@Property()
-	code: string = crypto.randomInt(0, 999999).toString();
+	code: string;
 
 	@Property()
 	email: string;
@@ -17,5 +17,13 @@ export class Otp extends CommonEntity {
 	constructor(email: string) {
 		super();
 		this.email = email;
+
+		const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+		let code = '';
+		for (let i = 0; i < 6; i++) {
+			const idx = crypto.randomInt(0, chars.length);
+			code += chars[idx];
+		}
+		this.code = code;
 	}
 }
