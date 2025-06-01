@@ -1,7 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { Type } from '@sinclair/typebox';
 import { initORM } from '@orm';
-import { User } from './user.entity';
+import { Method, User } from './user.entity';
 
 const route: FastifyPluginAsyncTypebox = async app => {
 	const db = await initORM();
@@ -28,15 +28,16 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		return await em.findOne(User, req.params.id, { exclude });
 	});
 	
-	app.get('/email-available', {
+	app.get('/available', {
 		schema: {
 			tags: ['user'],
+			description: 'Returns the method of the user with the provided email if it exists.',
 			querystring: Type.Object({ email: Type.String() })
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
 		const user = await em.findOne(User, { email: req.query.email });
-		return !!user ? true : false;
+		return !!user ? user.method : null;
 	});
 
 	app.post('/register', {
@@ -53,7 +54,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		const em = db.em.fork();
 		if (!req.user.otp) return res.status(401).send({ message: 'Provided token does originate from an OTP verification.' });
 
-		const user = new User(req.user.email, req.body.name);
+		const user = new User(req.user.email, req.body.name, Method.EMAIL);
 		user.password = req.body.password;
 		await em.persistAndFlush(user);
 

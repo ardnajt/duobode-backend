@@ -1,18 +1,13 @@
-import { BeforeCreate, BeforeUpdate, Cascade, Collection, Embeddable, Embedded, Entity, EventArgs, OneToMany, OneToOne, Property } from '@mikro-orm/sqlite';
+import { BeforeCreate, BeforeUpdate, Cascade, Collection, Embeddable, Embedded, Entity, Enum, EventArgs, OneToMany, OneToOne, Property } from '@mikro-orm/sqlite';
 import { CommonEntity } from '@modules/common/common.entity';
 import Rental from '@modules/rental/rental.entity';
-import { Tenant } from '@modules/tenant/tenant.entity';
 
 import { hash, verify } from 'argon2';
 import { FastifyInstance } from 'fastify';
 
-@Embeddable()
-export class Social {
-	@Property()
-	googleId?: string;
-
-	@Property()
-	facebookId?: string;
+export enum Method {
+	EMAIL = 'email',
+	SOCIAL = 'social'
 }
 
 @Entity()
@@ -26,16 +21,17 @@ export class User extends CommonEntity {
 	@Property()
 	password?: string;
 
-	@Embedded()
-	social?: Social;
+	@Enum()
+	method: Method;
 
-	@OneToMany(() => Rental, rental => rental.owner, { eager: true, cascade: [Cascade.ALL] })
+	@OneToMany(() => Rental, rental => rental.owner, { cascade: [Cascade.ALL] })
 	rentals = new Collection<Rental>(this);
 	
-	constructor(email: string, name: string) {
+	constructor(email: string, name: string, method: Method) {
 		super();
 		this.email = email;
 		this.name = name;
+		this.method = method;
 	}
 
 	@BeforeCreate()

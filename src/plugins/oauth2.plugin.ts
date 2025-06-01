@@ -1,7 +1,7 @@
 import fastifyPlugin from 'fastify-plugin';
 import fastifyOauth2 from '@fastify/oauth2';
 import { initORM } from '@orm';
-import { Social, User } from '@modules/user/user.entity';
+import { Method, User } from '@modules/user/user.entity';
 import axios from 'axios';
 import { FastifyReply } from 'fastify';
 import crypto from 'crypto';
@@ -34,35 +34,26 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 	 * - Redirects back to a provided route with the token automatically set as its cookie.
 	 *
 	 * @param reply - Fastify reply object used for sending error responses.
-	 * @param key - The social provider key (e.g., 'googleId', 'facebookId').
-	 * @param id - The unique ID from the social provider.
+	 * @param provider - The social provider key (e.g., 'googleId', 'facebookId').
+	 * @param idx - The unique ID from the social provider.
 	 * @param email - The email address provided by the social provider.
 	 * @param name - The display name of the user from the social provider.
 	 * @returns A signed token for the authenticated user, or an error response.
 	 */
-	async function handleUserLogin(reply: FastifyReply, key: keyof Social, id: string, email: string, name: string) {
+	async function handleUserLogin(reply: FastifyReply, email: string, name: string) {
 		const em = db.em.fork();
 
-		// Check if there's an account with the provided social's email.
-		let user = await em.findOne(User, { email });
-		// If there is but their associated social isn't linked or isn't the same value, it conflicts.
-		if (user && user.social?.[key] != id) return reply.status(403).send({ message: 'This account is already registered with a different social account. Please use another method to log in.', code: 'ACCOUNT_CONFLICT' });
-		else if (!user) {
-			const social: any = {};
-			social[key] = id;
-			// Find user by provided social ID.
-			user = await em.findOne(User, { social });
-			// If no account can be found, create a new account.
-			if (!user) {
-				user = new User(email, name);
-				user.social = social;
-				user.password = generatePassword();
-				await em.persistAndFlush(user);
-			}
+		let token: string;
+
+		const user = await em.findOne(User, { email });
+		if (user) token = user.generateToken(app);
+		else {
+			const user = new User(email, name, Method.SOCIAL);
+			user.password = generatePassword();
+			await em.persistAndFlush(user);
+			token = user.generateToken(app);
 		}
 
-		const token = user.generateToken(app);
-		
 		reply.setCookie('token', token, {
 			httpOnly: true,
 			secure: true,
@@ -90,8 +81,9 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 
 	app.get(`/oauth2/google/callback`, { schema: { hide: true } }, async (req, res) => {
 		const { token: authorisation } = await app.GoogleOAuth2.getAccessTokenFromAuthorizationCodeFlow(req);
-		const info = await app.GoogleOAuth2.userinfo(authorisation.access_token) as { sub: string, email: string, picture: string, name: string };
-		await handleUserLogin(res, 'googleId', info.sub, info.email, info.name);
+		const info = await app.GoogleOAuth2.userinfo(authorisation.access_token) as { email: string, name: string, picture: string };
+
+		await handleUserLogin(res, info.email, info.name);
 	});
 	// #endregion
 
@@ -113,7 +105,7 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 	app.get(`/oauth2/facebook/callback`, { schema: { hide: true } }, async (req, res) => {
 		const { token: authorisation } = await app.FacebookOAuth2.getAccessTokenFromAuthorizationCodeFlow(req);
 		const response = await axios.get<{ name: string, email: string, id: string }>('https://graph.facebook.com/me', { params: { access_token: authorisation.access_token, fields: 'name,email' } });
-		await handleUserLogin(res, 'facebookId', response.data.id, response.data.email, response.data.name);
+		await handleUserLogin(res, response.data.email, response.data.name);
 	});
 	// #endregion
 });
