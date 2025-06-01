@@ -1,8 +1,18 @@
-import 'module-alias/register';
 import dotenv from 'dotenv';
 dotenv.config();
 
+import moduleAliases from 'module-alias';
 import path from 'path';
+
+moduleAliases.addAliases({
+	"@orm": path.join(__dirname, 'orm'),
+	"@entities": path.join(__dirname, 'entities'),
+	"@modules": path.join(__dirname, 'modules'),
+	"@jobs": path.join(__dirname, 'jobs'),
+	"@plugins": path.join(__dirname, 'plugins'),
+	"@app": path.join(__dirname, 'app')
+});
+
 import chalk from 'chalk';
 
 import fastify from 'fastify';
@@ -17,22 +27,22 @@ import fastifyOauth2Plugin from '@plugins/oauth2.plugin';
 import { FastifyJwtNamespace } from '@fastify/jwt';
 import { OAuth2Namespace } from '@fastify/oauth2';
 
-const app = fastify({ 
+const app = fastify({
 	logger: Boolean(process.env.SERVER_DEBUG),
 	pluginTimeout: 0
 });
 
 declare module '@fastify/jwt' {
 	interface FastifyJWT {
-		user: { id: number, email: string };
+		user: { otp?: true, id: number, email: string };
 	}
 }
 declare module 'fastify' {
-  interface FastifyInstance extends FastifyJwtNamespace<{ namespace: 'security' }> {
-    authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+	interface FastifyInstance extends FastifyJwtNamespace<{ namespace: 'security' }> {
+		authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
 		GoogleOAuth2: OAuth2Namespace;
 		FacebookOAuth2: OAuth2Namespace;
-  }
+	}
 }
 
 

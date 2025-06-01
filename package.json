@@ -1,12 +1,4 @@
 {
-    "_moduleAliases": {
-        "@orm": "dist/orm",
-        "@entities": "dist/entities",
-        "@modules": "dist/modules",
-        "@jobs": "dist/jobs",
-        "@plugins": "dist/plugins",
-        "@app": "dist/"
-    },
     "scripts": {
         "dev": "nodemon src/index.ts",
         "build": "tsc",
@@ -41,6 +33,7 @@
     },
     "devDependencies": {
         "@mikro-orm/cli": "^6.4.15",
+        "@types/module-alias": "^2.0.4",
         "@types/nodemailer": "^6.4.17",
         "nodemon": "^3.1.10",
         "ts-node": "^10.9.2",
