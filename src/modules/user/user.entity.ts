@@ -29,9 +29,6 @@ export class User extends CommonEntity {
 	@Embedded()
 	social?: Social;
 
-	@OneToOne(() => Tenant)
-	tenant?: Tenant;
-
 	@OneToMany(() => Rental, rental => rental.owner, { eager: true, cascade: [Cascade.ALL] })
 	rentals = new Collection<Rental>(this);
 	

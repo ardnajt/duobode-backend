@@ -41,9 +41,9 @@ const route: FastifyPluginAsyncTypebox = async app => {
 			<p>This code will expire in 5 minutes. For security reasons, please do not reveal this code to anyone.</p>
 			<p>Thanks,<br />Team Homerent</p>
 			`
-		});
+		}).catch(() => null);
 
-		return result;
+		return !!result ? true : false;
 	});
 
 	app.post('/verify', {
@@ -64,7 +64,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 
 		await em.removeAndFlush(otp);
 		// Temporarily creatres a JWT token which stores the email for registration.
-		return app.jwt.sign({ email: otp.email });
+		return app.jwt.sign({ otp: true, email: otp.email });
 	});
 }
 

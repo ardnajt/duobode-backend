@@ -28,14 +28,14 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		return await em.findOne(User, req.params.id, { exclude });
 	});
 	
-	app.get('/email-used/:email', {
+	app.get('/email-available', {
 		schema: {
 			tags: ['user'],
-			params: Type.Object({ email: Type.String() })
+			querystring: Type.Object({ email: Type.String() })
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
-		const user = await em.findOne(User, { email: req.params.email });
+		const user = await em.findOne(User, { email: req.query.email });
 		return !!user ? true : false;
 	});
 
@@ -51,6 +51,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
+		if (!req.user.otp) return res.status(401).send({ message: 'Provided token does originate from an OTP verification.' });
 
 		const user = new User(req.user.email, req.body.name);
 		user.password = req.body.password;

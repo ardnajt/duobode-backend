@@ -27,7 +27,7 @@ export class TenantPreferences {
 
 @Entity()
 export class Tenant extends CommonEntity {
-	@OneToOne(() => User, user => user.tenant)
+	@OneToOne(() => User)
 	user: User;
 
 	@Enum()
