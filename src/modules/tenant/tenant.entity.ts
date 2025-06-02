@@ -13,18 +13,6 @@ export enum TenantOccupation {
 	STUDENT = 'student'
 }
 
-@Embeddable()
-export class TenantPreferences {
-	@Property()
-	region?: string;
-
-	@Property()
-	district?: string;
-
-	@Property()
-	budget?: number;
-}
-
 @Entity()
 export class Tenant extends CommonEntity {
 	@OneToOne(() => User)
@@ -39,8 +27,11 @@ export class Tenant extends CommonEntity {
 	@Property()
 	bio?: string;
 
-	@Embedded()
-	preferences?: TenantPreferences;
+	@Property()
+	budget?: number;
+
+	@Property()
+	district?: string;
 
 	constructor(user: User, type: TenantType, occupation: TenantOccupation) {
 		super();
