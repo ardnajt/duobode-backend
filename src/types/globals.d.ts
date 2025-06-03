@@ -19,6 +19,9 @@ declare namespace NodeJS {
 		EMAIL_AUTH_USER: string;
 		EMAIL_AUTH_PASS: string;
 
+		RECAPTCHA_HOSTNAME: string;
+		RECAPTCHA_SECRET_KEY: string;
+
 		API_ONEMAP_ACCESS_KEY: string;
 
 		API_OAUTH2_GOOGLE_CLIENT: string;
