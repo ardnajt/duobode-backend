@@ -3,6 +3,7 @@ import { initORM } from '@orm';
 import { Type } from '@sinclair/typebox';
 import { Tenant, TenantOccupation, TenantType } from './tenant.entity';
 import { User } from '@modules/user/user.entity';
+import { District } from '@modules/district/district.entity';
 
 const route: FastifyPluginAsyncTypebox = async app => {
 	const db = await initORM();
@@ -17,7 +18,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 				occupation: Type.Enum(TenantOccupation),
 				bio: Type.Optional(Type.String()),
 				budget: Type.Optional(Type.Number()),
-				district: Type.Optional(Type.String())
+				districts: Type.Optional(Type.Array(Type.Number()))
 			})
 		}
 	}, async (req, res) => {
@@ -28,7 +29,11 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		const tenant = new Tenant(user, req.body.type, req.body.occupation);
 		if (req.body.bio != undefined) tenant.bio = req.body.bio;
 		if (req.body.budget != undefined) tenant.budget = req.body.budget;
-		if (req.body.district != undefined) tenant.district = req.body.district;
+
+		if (req.body.districts?.length) {
+			const districts = req.body.districts.map(id => em.getReference(District, id));
+			if (districts.length) tenant.districts.set(districts);
+		}
 
 		await em.persistAndFlush(tenant);
 		return tenant;
@@ -44,7 +49,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 				occupation: Type.Optional(Type.Enum(TenantOccupation)),
 				bio: Type.Optional(Type.String()),
 				budget: Type.Optional(Type.Number()),
-				district: Type.Optional(Type.String())
+				districts: Type.Optional(Type.Array(Type.Number()))
 			})
 		}
 	}, async (req, res) => {
@@ -55,7 +60,11 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		if (req.body.occupation != undefined) tenant.occupation = req.body.occupation;
 		if (req.body.bio != undefined) tenant.bio = req.body.bio;
 		if (req.body.budget != undefined) tenant.budget = req.body.budget;
-		if (req.body.district != undefined) tenant.district = req.body.district;
+
+		if (req.body.districts?.length) {
+			const districts = req.body.districts.map(id => em.getReference(District, id));
+			if (districts.length) tenant.districts.set(districts);
+		}
 
 		await em.persistAndFlush(tenant);
 		return tenant;
