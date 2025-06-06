@@ -18,6 +18,15 @@ const route: FastifyPluginAsyncTypebox = async app => {
 	}, async (req, res) => {
 		const em = db.em.fork();
 
+		let otp: Otp | null;
+		otp = await em.findOne(Otp, { email: req.body.email }, { orderBy: { createdAt: 'desc' } });
+		// If there wasn't a previous OTP or that it has been more than a minute since the previous was created
+		if (!otp || dayjs().diff(otp.createdAt) > 60_000) {
+			if (otp) await em.removeAndFlush(otp);
+			otp = new Otp(req.body.email);
+			await em.persistAndFlush(otp);	
+		}
+
 		const transporter = nodemailer.createTransport({
 			service: 'gmail',
 			host: 'smtp.gmail.com',
@@ -28,16 +37,6 @@ const route: FastifyPluginAsyncTypebox = async app => {
 				pass: process.env.EMAIL_AUTH_PASS
 			}
 		});
-
-		let otp: Otp | null;
-		otp = await em.findOne(Otp, { email: req.body.email }, { orderBy: { createdAt: 'desc' } });
-
-		// If there wasn't a previous OTP or that it has been more than a minute since the previous was created
-		if (!otp || dayjs().diff(otp.createdAt) > 60_000) {
-			if (otp) await em.removeAndFlush(otp);
-			otp = new Otp(req.body.email);
-			await em.persistAndFlush(otp);	
-		}
 
 		const result = await transporter.sendMail({
 			from: `"Homerent" <${process.env.EMAIL_AUTH_USER}>`,

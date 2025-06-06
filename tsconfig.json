@@ -11,7 +11,7 @@
       "@modules/*": ["modules/*"],
       "@jobs/*": ["jobs/*"],
       "@plugins/*": ["plugins/*"],
-      "@app": ["src/index.ts"]
+      "@app/*": ["./*"]
     },
     "outDir": "./dist",
     "rootDir": "./src",

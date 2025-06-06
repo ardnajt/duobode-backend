@@ -10,7 +10,7 @@ moduleAliases.addAliases({
 	"@modules": path.join(__dirname, 'modules'),
 	"@jobs": path.join(__dirname, 'jobs'),
 	"@plugins": path.join(__dirname, 'plugins'),
-	"@app": path.join(__dirname, 'app')
+	"@app": path.join(__dirname)
 });
 
 import chalk from 'chalk';
