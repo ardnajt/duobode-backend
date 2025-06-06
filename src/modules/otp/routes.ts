@@ -19,7 +19,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		const em = db.em.fork();
 
 		const lastSentOtp = await em.findOne(Otp, { email: req.body.email }, { orderBy: { createdAt: 'desc' }});
-		if (lastSentOtp && dayjs(Date.now()).diff(lastSentOtp.createdAt) <= 60_000) return res.status(429).send({ message: 'Please wait for 1 minute before requesting for a new OTP.' });
+		if (lastSentOtp && dayjs().diff(lastSentOtp.createdAt) <= 60_000) return res.status(429).send({ message: 'Please wait for 1 minute before requesting for a new OTP.' });
 
 		const otp = new Otp(req.body.email);
 		await em.persistAndFlush(otp);
