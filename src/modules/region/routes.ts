@@ -5,7 +5,11 @@ import { Region } from './region.entity';
 const route: FastifyPluginAsyncTypebox = async (app) => {
 	const db = await initORM();
 
-	app.get('', async (req, res) => {
+	app.get('', {
+		schema: {
+			tags: ['region']
+		}
+	}, async (req, res) => {
 		const em = db.em.fork();
 		return await em.find(Region, {});
 	});
