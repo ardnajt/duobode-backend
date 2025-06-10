@@ -59,7 +59,7 @@ const fastifyOauth2Plugin = fastifyPlugin(async app => {
 			secure: true,
 			sameSite: 'lax',
 			path: '/'
-		}).redirect(process.env.WEBSITE_URL);
+		}).redirect(`${process.env.WEBSITE_URL}?sync=1`);
 	}
 
 	// #region Google
