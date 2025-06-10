@@ -8,6 +8,17 @@ import { District } from '@modules/district/district.entity';
 const route: FastifyPluginAsyncTypebox = async app => {
 	const db = await initORM();
 
+	app.get('', {
+		onRequest: [app.authenticate],
+		schema: {
+			tags: ['tenant'],
+			security: [{ BearerAuth: [] }]
+		}
+	},async (req, res) => {
+			const em = db.em.fork();
+			return await em.find(Tenant, {});
+	});
+
 	app.post('/create', {
 		onRequest: [app.authenticate],
 		schema: {
