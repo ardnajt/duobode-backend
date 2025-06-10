@@ -10,6 +10,15 @@ export enum Method {
 	SOCIAL = 'social'
 }
 
+@Embeddable()
+export class Phone {
+	@Property()
+	number?: string;
+
+	@Property()
+	verified: boolean = false;
+}
+
 @Entity()
 export class User extends CommonEntity {
 	@Property({ unique: true })
@@ -23,6 +32,9 @@ export class User extends CommonEntity {
 
 	@Enum()
 	method: Method;
+
+	@Embedded()
+	phone: Phone = new Phone();
 
 	@OneToMany(() => Rental, rental => rental.owner, { cascade: [Cascade.ALL] })
 	rentals = new Collection<Rental>(this);
