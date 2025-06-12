@@ -16,7 +16,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		}
 	},async (req, res) => {
 			const em = db.em.fork();
-			return await em.find(Tenant, {});
+			return await em.find(Tenant, {}, { populate: ['user', 'districts'], exclude: ['user.password'] });
 	});
 
 	app.post('/create', {
