@@ -34,7 +34,13 @@ const app = fastify({
 
 declare module '@fastify/jwt' {
 	interface FastifyJWT {
-		user: { otp?: true, id: number, email: string };
+		user: { 
+			id: number, 
+			email: string,
+
+			otp?: boolean,
+			method?: 'login' | 'register'
+		};
 	}
 }
 declare module 'fastify' {

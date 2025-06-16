@@ -71,7 +71,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 
 		await em.removeAndFlush(otp);
 		// Temporarily creatres a JWT token which stores the email for registration.
-		return app.jwt.sign({ otp: true, email: otp.email });
+		return app.jwt.sign({ otp: true, method: 'register', email: otp.email });
 	});
 }
 
