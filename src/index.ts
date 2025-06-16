@@ -38,8 +38,7 @@ declare module '@fastify/jwt' {
 			id: number, 
 			email: string,
 
-			otp?: boolean,
-			method?: 'login' | 'register'
+			otp?: 'login' | 'register'
 		};
 	}
 }

@@ -79,7 +79,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
-		if (!req.user.otp && req.user.method != 'register') return res.status(401).send({ message: 'Provided token does originate from an OTP verification.' });
+		if (req.user.otp != 'register') return res.status(401).send({ message: 'Provided token does originate from an OTP verification.' });
 
 		const user = new User(req.user.email, req.body.name, Method.EMAIL);
 		user.password = req.body.password;
