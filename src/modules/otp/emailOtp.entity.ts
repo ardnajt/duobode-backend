@@ -20,7 +20,7 @@ export class EmailOtp extends CommonEntity {
 
 		const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 		let code = '';
-		for (let i = 0; i < 6; i++) {
+		for (let i = 0; i < 5; i++) {
 			const idx = crypto.randomInt(0, chars.length);
 			code += chars[idx];
 		}
