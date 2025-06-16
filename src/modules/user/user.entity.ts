@@ -1,4 +1,4 @@
-import { BeforeCreate, BeforeUpdate, Cascade, Collection, Embeddable, Embedded, Entity, Enum, EventArgs, OneToMany, OneToOne, Property } from '@mikro-orm/sqlite';
+import { BeforeCreate, BeforeUpdate, Cascade, Collection, Embeddable, Embedded, Entity, Enum, EventArgs, OneToMany, Property } from '@mikro-orm/sqlite';
 import { CommonEntity } from '@modules/common/common.entity';
 import Rental from '@modules/rental/rental.entity';
 
@@ -14,6 +14,9 @@ export enum Method {
 export class Phone {
 	@Property()
 	number?: string;
+
+	@Property()
+	prefix?: string;
 
 	@Property()
 	verified: boolean = false;

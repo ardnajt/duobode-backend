@@ -18,6 +18,33 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		return await em.findOneOrFail(User, req.user.id, { exclude });
 	});
 
+	app.put('', {
+		onRequest: [app.authenticate],
+		schema: {
+			tags: ['user'],
+			security: [{ BearerAuth: [] }],
+			body: Type.Object({
+				name: Type.Optional(Type.String()),
+				phone: Type.Optional(Type.Object({
+					number: Type.Optional(Type.String()),
+					prefix: Type.Optional(Type.String())
+				}))
+			})
+		}
+	}, async (req, res) => {
+		const em = db.em.fork();
+		const user = await em.findOneOrFail(User, req.user.id);
+
+		if (req.body.name != undefined) user.name = req.body.name;
+		if (req.body.phone?.number != undefined && req.body.phone.prefix != undefined) {
+			user.phone.number = req.body.phone.number;
+			user.phone.prefix = req.body.phone.prefix;
+		}
+
+		await em.persistAndFlush(user);
+		return user.generateToken(app);
+	});
+
 	app.get('/:id', {
 		schema: {
 			tags: ['user'],
