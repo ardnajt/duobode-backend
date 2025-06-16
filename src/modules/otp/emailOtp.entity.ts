@@ -4,7 +4,7 @@ import { CommonEntity } from '@modules/common/common.entity';
 import dayjs from 'dayjs';
 
 @Entity()
-export class Otp extends CommonEntity {
+export class EmailOtp extends CommonEntity {
 	@Property()
 	code: string;
 
