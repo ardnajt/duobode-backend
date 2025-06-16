@@ -37,6 +37,8 @@ const route: FastifyPluginAsyncTypebox = async app => {
 
 		if (req.body.name != undefined) user.name = req.body.name;
 		if (req.body.phone?.number != undefined && req.body.phone.prefix != undefined) {
+			// Sets phone number to unverified if they changed it
+			if (user.phone.number != req.body.phone.number) user.phone.verified = false;
 			user.phone.number = req.body.phone.number;
 			user.phone.prefix = req.body.phone.prefix;
 		}
@@ -109,6 +111,24 @@ const route: FastifyPluginAsyncTypebox = async app => {
 			return token;
 		}
 		else res.status(401).send({ message: 'Invalid credentials.' });
+	});
+
+	app.post('/unlink-phone', {
+		onRequest: [app.authenticate],
+		schema: {
+			tags: ['user'],
+			security: [{ BearerAuth: [] }]
+		}
+	}, async (req, res) => {
+		const em = db.em.fork();
+
+		const user = await em.findOneOrFail(User, req.user.id);
+		user.phone.prefix = 'SG';
+		user.phone.number = undefined;
+		user.phone.verified = false;
+		await em.persistAndFlush(user);
+
+		return true;
 	});
 }
 
