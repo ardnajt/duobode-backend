@@ -2,7 +2,7 @@ import { Entity, Property } from '@mikro-orm/sqlite';
 import { CommonEntity } from '@modules/common/common.entity';
 
 @Entity()
-export class Region extends CommonEntity {
+export default class Region extends CommonEntity {
 	@Property({ unique: true })
 	name: string;
 

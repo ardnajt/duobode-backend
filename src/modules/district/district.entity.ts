@@ -1,9 +1,9 @@
 import { Entity, ManyToOne, Property } from '@mikro-orm/sqlite';
 import { CommonEntity } from '@modules/common/common.entity';
-import { Region } from '@modules/region/region.entity';
+import Region from '@modules/region/region.entity';
 
 @Entity()
-export class District extends CommonEntity {
+export default class District extends CommonEntity {
 	@ManyToOne()
 	region: Region;
 	

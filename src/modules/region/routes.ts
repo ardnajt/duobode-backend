@@ -1,6 +1,6 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { initORM } from '@orm';
-import { Region } from './region.entity';
+import Region from './region.entity';
 
 const route: FastifyPluginAsyncTypebox = async (app) => {
 	const db = await initORM();

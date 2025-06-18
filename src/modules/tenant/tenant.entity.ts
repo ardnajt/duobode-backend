@@ -1,6 +1,6 @@
 import { Collection, Entity, Enum, ManyToMany, OneToOne, Property } from '@mikro-orm/sqlite';
 import { CommonEntity } from '@modules/common/common.entity';
-import { District } from '@modules/district/district.entity';
+import District from '@modules/district/district.entity';
 import { User } from '@modules/user/user.entity';
 
 export enum TenantType {

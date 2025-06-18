@@ -3,20 +3,29 @@ import { initORM } from '@orm';
 import { Type } from '@sinclair/typebox';
 import { Tenant, TenantOccupation, TenantType } from './tenant.entity';
 import { User } from '@modules/user/user.entity';
-import { District } from '@modules/district/district.entity';
+import District from '@modules/district/district.entity';
 
 const route: FastifyPluginAsyncTypebox = async app => {
 	const db = await initORM();
 
-	app.get('', {
+	app.get('/self', {
 		onRequest: [app.authenticate],
 		schema: {
 			tags: ['tenant'],
 			security: [{ BearerAuth: [] }]
 		}
-	},async (req, res) => {
-			const em = db.em.fork();
-			return await em.find(Tenant, {}, { populate: ['user', 'districts'], exclude: ['user.password'] });
+	}, async (req, res) => {
+		const em = db.em.fork();
+		return await em.findOne(Tenant, { user: req.user.id }, { populate: ['districts'] });
+	});
+
+	app.get('', {
+		schema: {
+			tags: ['tenant'],
+		}
+	}, async (req, res) => {
+		const em = db.em.fork();
+		return await em.find(Tenant, {}, { populate: ['user', 'districts'], exclude: ['user.password'] });
 	});
 
 	app.post('/create', {
