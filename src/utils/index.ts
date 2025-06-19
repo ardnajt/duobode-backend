@@ -4,7 +4,7 @@ import fs from 'fs';
 import promises from 'fs/promises';
 
 export namespace Utils {
-	/** Upload the file in a file system with the provided name, returning its url */
+	/** Upload the file in the filesystem with the provided name, returning its url */
 	export async function uploadFile(data: MultipartFile, subdir: string) {
 		const uploadDir = path.join(process.cwd(), 'uploads', 'images', subdir);
 
@@ -12,11 +12,16 @@ export namespace Utils {
 		if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 		const ext = path.extname(data.filename);
-		const suffix = Date.now();
-		const filename = `${suffix}${Math.round(Math.random() * 1e9)}${ext}`;
+		const filename = `${Date.now()}${Math.round(Math.random() * 1e9)}${ext}`;
 		const filepath = path.join(uploadDir, filename);
 
 		await promises.writeFile(filepath.toString(), await data.toBuffer());
 		return `/uploads/images/${subdir}/${filename}`;
+	}
+
+	/** Delete a file in the filesystem with the provided url */
+	export async function deleteFile(url: string) {
+		const filepath = path.join(process.cwd(), url);
+		await promises.unlink(filepath);
 	}
 }
