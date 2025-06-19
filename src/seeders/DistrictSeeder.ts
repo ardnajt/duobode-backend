@@ -1,7 +1,7 @@
 import type { EntityManager } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
-import { District } from '@modules/district/district.entity';
-import { Region } from '@modules/region/region.entity';
+import District from '@modules/district/district.entity';
+import Region from '@modules/region/region.entity';
 
 // npx mikro-orm seeder:run --class=DistrictSeeder
 
