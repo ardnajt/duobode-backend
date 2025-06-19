@@ -2,5 +2,6 @@ dist/
 database/
 migrations/
 node_modules/
+uploads/
 temp/
 .env

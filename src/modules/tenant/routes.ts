@@ -65,15 +65,15 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		return tenant;
 	});
 
-	app.post('/upload', {
+	app.put('/imageurl', {
 		onRequest: [app.authenticate],
 		schema: {
 			tags: ['tenant'],
 			security: [{ BearerAuth: [] }]
 		}
-	},
-	async (req, res) => {
+	}, async (req, res) => {
 		const em = db.em.fork();
+
 		const data = await req.file();
 		if (!data) return res.status(400).send({ message: 'File missing.' });
 
@@ -82,12 +82,34 @@ const route: FastifyPluginAsyncTypebox = async app => {
 			const user = await em.findOneOrFail(User, req.user.id);
 			tenant = new Tenant(user);
 		}
+		else if (tenant.imageUrl) await Utils.deleteFile(tenant.imageUrl);
 
 		const url = await Utils.uploadFile(data, 'tenant');
 		tenant.imageUrl = url;
 		await em.persistAndFlush(tenant);
-		console.log(url);
+
+		return tenant;
 	});
+
+	app.delete('/imageurl', {
+		onRequest: [app.authenticate],
+		schema: {
+			tags: ['tenant'],
+			security: [{ BearerAuth: [] }]
+		}
+	}, async (req, res) => {
+		const em = db.em.fork();
+		const tenant = await em.findOne(Tenant, { user: req.user.id });
+		
+		if (tenant?.imageUrl) {
+			await Utils.deleteFile(tenant.imageUrl);
+			tenant.imageUrl = undefined;
+			await em.persistAndFlush(tenant);
+		}
+
+		return tenant;
+	});
+	
 }
 
 export default route;
