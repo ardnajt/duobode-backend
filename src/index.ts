@@ -26,6 +26,7 @@ import fastifyOauth2Plugin from '@plugins/oauth2.plugin';
 
 import { FastifyJwtNamespace } from '@fastify/jwt';
 import { OAuth2Namespace } from '@fastify/oauth2';
+import fastifyStatic from '@fastify/static';
 
 const app = fastify({
 	logger: Boolean(process.env.SERVER_DEBUG),
@@ -53,6 +54,11 @@ declare module 'fastify' {
 
 async function bootstrap() {
 	app.register(fastifyCors, { origin: process.env.CORS });
+	app.register(fastifyStatic, {
+		root: path.join(process.cwd(), 'uploads'),
+		prefix: '/uploads/'
+	});
+	
 	app.register(fastifySwaggerPlugin);
 	app.register(fastifyJwtPlugin);
 	app.register(fastifyOauth2Plugin);
