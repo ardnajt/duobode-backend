@@ -20,10 +20,10 @@ export class Tenant extends CommonEntity {
 	user: User;
 
 	@Enum()
-	type: TenantType;
+	type?: TenantType;
 
 	@Enum()
-	occupation: TenantOccupation;
+	occupation?: TenantOccupation;
 
 	@Property()
 	bio?: string;
@@ -31,13 +31,14 @@ export class Tenant extends CommonEntity {
 	@Property()
 	budget?: number;
 
+	@Property()
+	imageUrl?: string;
+
 	@ManyToMany()
 	districts = new Collection<District>(this);
 
-	constructor(user: User, type: TenantType, occupation: TenantOccupation) {
+	constructor(user: User) {
 		super();
 		this.user = user;
-		this.type = type;
-		this.occupation = occupation;
 	}
 }
