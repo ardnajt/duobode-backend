@@ -4,6 +4,7 @@ import { Type } from '@sinclair/typebox';
 import { Tenant, TenantOccupation, TenantType } from './tenant.entity';
 import { User } from '@modules/user/user.entity';
 import District from '@modules/district/district.entity';
+import { Utils } from '@app/utils';
 
 const route: FastifyPluginAsyncTypebox = async app => {
 	const db = await initORM();
@@ -28,7 +29,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		return await em.find(Tenant, {}, { populate: ['user', 'districts'], exclude: ['user.password'] });
 	});
 
-	app.put('', {
+	app.post('', {
 		onRequest: [app.authenticate],
 		schema: {
 			tags: ['tenant'],
@@ -47,7 +48,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		let tenant = await em.findOne(Tenant, { user: req.user.id });
 		if (!tenant) {
 			const user = await em.findOneOrFail(User, req.user.id);
-			tenant = new Tenant(user, req.body.type, req.body.occupation);
+			tenant = new Tenant(user);
 		}
 
 		if (req.body.type != undefined) tenant.type = req.body.type;
@@ -62,6 +63,30 @@ const route: FastifyPluginAsyncTypebox = async app => {
 
 		await em.persistAndFlush(tenant);
 		return tenant;
+	});
+
+	app.post('/upload', {
+		onRequest: [app.authenticate],
+		schema: {
+			tags: ['tenant'],
+			security: [{ BearerAuth: [] }]
+		}
+	},
+	async (req, res) => {
+		const em = db.em.fork();
+		const data = await req.file();
+		if (!data) return res.status(400).send({ message: 'File missing.' });
+
+		let tenant = await em.findOne(Tenant, { user: req.user.id });
+		if (!tenant) {
+			const user = await em.findOneOrFail(User, req.user.id);
+			tenant = new Tenant(user);
+		}
+
+		const url = await Utils.uploadFile(data, 'tenant');
+		tenant.imageUrl = url;
+		await em.persistAndFlush(tenant);
+		console.log(url);
 	});
 }
 
