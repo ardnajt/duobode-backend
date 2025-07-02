@@ -5,6 +5,7 @@ import { Tenant, TenantOccupation, TenantType } from './tenant.entity';
 import { User } from '@modules/user/user.entity';
 import District from '@modules/district/district.entity';
 import { Utils } from '@app/utils';
+import { RentalType } from '@modules/rental/rental.entity';
 
 const route: FastifyPluginAsyncTypebox = async app => {
 	const db = await initORM();
@@ -29,6 +30,26 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		return await em.find(Tenant, {}, { populate: ['user', 'districts'], exclude: ['user.password'] });
 	});
 
+	app.get('/recent', {
+		schema: {
+			tags: ['tenant']
+		}
+	}, async (req, res) => {
+		const em = db.em.fork();
+
+		const tenants = await em.find(Tenant, {}, {
+			populate: ['user', 'districts'],
+			orderBy: { createdAt: 'DESC' },
+			exclude: ['user.email', 'user.password', 'user.method'],
+			limit: 6
+		});
+
+		return tenants.map((t: any) => {
+			delete t.user.phone;
+			return t;
+		});
+	});
+
 	app.post('', {
 		onRequest: [app.authenticate],
 		schema: {
@@ -36,6 +57,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 			security: [{ BearerAuth: [] }],
 			body: Type.Object({
 				type: Type.Enum(TenantType),
+				rental: Type.Enum(RentalType),
 				occupation: Type.Enum(TenantOccupation),
 				bio: Type.Optional(Type.String()),
 				budget: Type.Optional(Type.Number()),
@@ -52,9 +74,12 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		}
 
 		if (req.body.type != undefined) tenant.type = req.body.type;
+		if (req.body.rental != undefined) tenant.rental = req.body.rental;
 		if (req.body.occupation != undefined) tenant.occupation = req.body.occupation;
 		if (req.body.bio != undefined) tenant.bio = req.body.bio;
 		if (req.body.budget != undefined) tenant.budget = req.body.budget;
+
+		console.log(req.body.districts);
 
 		if (req.body.districts?.length) {
 			const districts = req.body.districts.map(id => em.getReference(District, id));

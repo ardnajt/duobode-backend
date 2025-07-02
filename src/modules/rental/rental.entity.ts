@@ -5,7 +5,7 @@ import axios from 'axios';
 
 export enum RentalType {
 	ROOM = 'room',
-	UNIT = 'unit'
+	UNIT = 'whole unit'
 }
 
 export enum PropertyType {
