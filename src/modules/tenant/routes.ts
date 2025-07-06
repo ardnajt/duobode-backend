@@ -14,11 +14,17 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		onRequest: [app.authenticate],
 		schema: {
 			tags: ['tenant'],
+			description: 'Fetch tenant details for the authenticated user.',
 			security: [{ BearerAuth: [] }]
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
-		return await em.findOne(Tenant, { user: req.user.id }, { populate: ['districts'] });
+		const tenant = await em.findOne(Tenant, { user: req.user.id }, { populate: ['districts'] });
+		if (tenant) return tenant;
+		else {
+			const user = await em.findOneOrFail(User, req.user.id);
+			return new Tenant(user);
+		}
 	});
 
 	app.get('', {
@@ -27,12 +33,13 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
-		return await em.find(Tenant, {}, { populate: ['user', 'districts'], exclude: ['user.password'] });
+		return await em.find(Tenant, {}, { populate: ['user', 'districts'], exclude: ['user.email', 'user.password'] });
 	});
 
 	app.get('/recent', {
 		schema: {
-			tags: ['tenant']
+			tags: ['tenant'],
+			description: 'Fetch recently created tenants.'
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
@@ -40,20 +47,18 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		const tenants = await em.find(Tenant, {}, {
 			populate: ['user', 'districts'],
 			orderBy: { createdAt: 'DESC' },
-			exclude: ['user.email', 'user.password', 'user.method'],
+			exclude: ['user.email', 'user.password'],
 			limit: 6
 		});
 
-		return tenants.map((t: any) => {
-			delete t.user.phone;
-			return t;
-		});
+		return tenants;
 	});
 
 	app.post('', {
 		onRequest: [app.authenticate],
 		schema: {
 			tags: ['tenant'],
+			description: 'Update tenant details. If tenant does not exist for the user, it will be created.',
 			security: [{ BearerAuth: [] }],
 			body: Type.Object({
 				type: Type.Enum(TenantType),
@@ -79,8 +84,6 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		if (req.body.bio != undefined) tenant.bio = req.body.bio;
 		if (req.body.budget != undefined) tenant.budget = req.body.budget;
 
-		console.log(req.body.districts);
-
 		if (req.body.districts?.length) {
 			const districts = req.body.districts.map(id => em.getReference(District, id));
 			if (districts.length) tenant.districts.set(districts);
@@ -94,6 +97,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		onRequest: [app.authenticate],
 		schema: {
 			tags: ['tenant'],
+			description: 'Upload an image for the tenant.',
 			security: [{ BearerAuth: [] }]
 		}
 	}, async (req, res) => {

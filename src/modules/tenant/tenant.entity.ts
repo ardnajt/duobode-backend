@@ -5,14 +5,14 @@ import { RentalType } from '@modules/rental/rental.entity';
 import { User } from '@modules/user/user.entity';
 
 export enum TenantType {
-	MALE = 'male',
-	FEMALE = 'female',
-	COUPLE = 'couple'
+	MALE,
+	FEMALE,
+	COUPLE
 }
 
 export enum TenantOccupation {
-	PROFESSIONAL = 'professional',
-	STUDENT = 'student'
+	PROFESSIONAL,
+	STUDENT
 }
 
 @Entity()

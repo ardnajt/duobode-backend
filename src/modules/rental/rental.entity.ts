@@ -1,43 +1,78 @@
 import { Embeddable, Embedded, Entity, Enum, ManyToOne, Property } from '@mikro-orm/sqlite';
 import { CommonEntity } from '@modules/common/common.entity';
+import District from '@modules/district/district.entity';
 import { User } from '@modules/user/user.entity';
-import axios from 'axios';
 
 export enum RentalType {
-	ROOM = 'room',
-	UNIT = 'whole unit'
+	ROOM,
+	PROPERTY
 }
 
 export enum PropertyType {
-	HDB = 'hdb',
-	CONDO = 'condo',
-	LANDED = 'landed'
+	HDB,
+	CONDO,
+	LANDED
 }
 
-export enum Duration {
-	SHORT_TERM = 'short',
-	LONG_TERM = 'long'
+export enum RentalDuration {
+	SHORT_TERM,
+	LONG_TERM
 }
 
 export enum RentalState {
-	DRAFT = 'draft',
-	ACTIVE = 'active',
-	INACTIVE = 'inactive'
+	DRAFT,
+	ACTIVE,
+	INACTIVE
+}
+
+export enum RentalTenantPreferredOccupation {
+	NONE,
+	PROFESSIONAL,
+	STUDENT
+}
+
+export enum RentalTenantPreferredType {
+	NONE,
+	MALE,
+	FEMALE,
+	COUPLE,
+	NOCOUPLE
 }
 
 @Embeddable()
-export class Location {
-	@Property()
-	postal?: string;
+export class RentalLocation {
+	@ManyToOne(() => District, { eager: true })
+	district?: District;
 
 	@Property()
-	latitude?: number;
+	address?: string;
+}
+
+@Embeddable()
+export class RentalFeatures {
+	@Property()
+	furnished = false;
 
 	@Property()
-	longitude?: number;
+	internet = false;
 
 	@Property()
-	district?: string;
+	aircon = false;
+	
+	@Property()
+	cooking = false;
+
+	@Property()
+	shared = false;
+}
+
+@Embeddable()
+export class RentalPreferences {
+	@Property()
+	type = RentalTenantPreferredType.NONE;
+
+	@Property()
+	occupation = RentalTenantPreferredOccupation.NONE;
 }
 
 @Entity()
@@ -46,7 +81,7 @@ export default class Rental extends CommonEntity {
 	owner: User;
 
 	@Enum()
-	state: RentalState = RentalState.DRAFT;
+	state = RentalState.DRAFT;
 	
 	@Property()
 	title?: string;
@@ -55,25 +90,28 @@ export default class Rental extends CommonEntity {
 	description?: string;
 
 	@Property()
-	pax?: number;
+	pax = 1;
 
 	@Enum()
-	type?: RentalType;
+	type = RentalType.ROOM;
 
 	@Enum()
-	property?: PropertyType;
+	property = PropertyType.HDB;
 
 	@Enum()
-	duration?: Duration; 
+	duration = RentalDuration.LONG_TERM;
 
 	@Property()
 	rent?: number;
 
-	@Property()
-	furnished?: boolean;
+	@Embedded()
+	location = new RentalLocation();
 
 	@Embedded()
-	location?: Location;
+	features = new RentalFeatures();
+
+	@Embedded()
+	preferences = new RentalPreferences();
 
 	constructor(owner: User) {
 		super();
@@ -81,11 +119,11 @@ export default class Rental extends CommonEntity {
 	}
 
 	/** Utilises reverse geocoding to ensure that the provided `postal` matches with the `latitude` and `longitude`. */
-	async validateLocation(location: Omit<Location, 'district'>) {
-		const response = await axios.get<{ GeocodeInfo: { POSTALCODE: string }[] }>(`https://www.onemap.gov.sg/api/public/revgeocode?location=${location.latitude},${location.longitude}`, { headers: {
-			'Authorization': process.env.API_ONEMAP_ACCESS_KEY
-		}}).catch(() => null);
+	// async validateLocation(location: Omit<RentalLocation, 'district'>) {
+	// 	const response = await axios.get<{ GeocodeInfo: { POSTALCODE: string }[] }>(`https://www.onemap.gov.sg/api/public/revgeocode?location=${location.latitude},${location.longitude}`, { headers: {
+	// 		'Authorization': process.env.API_ONEMAP_ACCESS_KEY
+	// 	}}).catch(() => null);
 
-		return !!response && response.data.GeocodeInfo.some(i => i.POSTALCODE == location.postal);
-	}
+	// 	return !!response && response.data.GeocodeInfo.some(i => i.POSTALCODE == location.postal);
+	// }
 }
