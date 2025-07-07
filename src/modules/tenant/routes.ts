@@ -1,7 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { initORM } from '@orm';
 import { Type } from '@sinclair/typebox';
-import { Tenant, TenantOccupation, TenantType } from './tenant.entity';
+import { Tenant, TenantOccupation, TenantState, TenantType } from './tenant.entity';
 import { User } from '@modules/user/user.entity';
 import District from '@modules/district/district.entity';
 import { Utils } from '@app/utils';
@@ -19,7 +19,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
-		const tenant = await em.findOne(Tenant, { user: req.user.id }, { populate: ['districts'] });
+		const tenant = await em.findOne(Tenant, { user: req.user.id }, { populate: ['user', 'districts'], exclude: ['user.email', 'user.password'] });
 		if (tenant) return tenant;
 		else {
 			const user = await em.findOneOrFail(User, req.user.id);
@@ -44,7 +44,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 	}, async (req, res) => {
 		const em = db.em.fork();
 
-		const tenants = await em.find(Tenant, {}, {
+		const tenants = await em.find(Tenant, { state: TenantState.ACTIVE }, {
 			populate: ['user', 'districts'],
 			orderBy: { createdAt: 'DESC' },
 			exclude: ['user.email', 'user.password'],
@@ -61,9 +61,10 @@ const route: FastifyPluginAsyncTypebox = async app => {
 			description: 'Update tenant details. If tenant does not exist for the user, it will be created.',
 			security: [{ BearerAuth: [] }],
 			body: Type.Object({
-				type: Type.Enum(TenantType),
-				rental: Type.Enum(RentalType),
-				occupation: Type.Enum(TenantOccupation),
+				type: Type.Optional(Type.Enum(TenantType)),
+				state: Type.Optional(Type.Enum(TenantState)),
+				rental: Type.Optional(Type.Enum(RentalType)),
+				occupation: Type.Optional(Type.Enum(TenantOccupation)),
 				bio: Type.Optional(Type.String()),
 				budget: Type.Optional(Type.Number()),
 				districts: Type.Optional(Type.Array(Type.Number()))
@@ -79,6 +80,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		}
 
 		if (req.body.type != undefined) tenant.type = req.body.type;
+		if (req.body.state != undefined) tenant.state = req.body.state;
 		if (req.body.rental != undefined) tenant.rental = req.body.rental;
 		if (req.body.occupation != undefined) tenant.occupation = req.body.occupation;
 		if (req.body.bio != undefined) tenant.bio = req.body.bio;
@@ -115,8 +117,8 @@ const route: FastifyPluginAsyncTypebox = async app => {
 
 		const url = await Utils.uploadFile(data, 'tenant');
 		tenant.imageUrl = url;
-		await em.persistAndFlush(tenant);
 
+		await em.persistAndFlush(tenant);
 		return tenant;
 	});
 

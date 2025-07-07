@@ -15,10 +15,18 @@ export enum TenantOccupation {
 	STUDENT
 }
 
+export enum TenantState {
+	INACTIVE,
+	ACTIVE
+}
+
 @Entity()
 export class Tenant extends CommonEntity {
 	@OneToOne(() => User)
 	user: User;
+
+	@Property()
+	state = TenantState.INACTIVE;
 
 	@Enum()
 	type?: TenantType;

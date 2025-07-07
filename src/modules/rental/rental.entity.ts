@@ -1,7 +1,8 @@
-import { Embeddable, Embedded, Entity, Enum, ManyToOne, Property } from '@mikro-orm/sqlite';
+import { Cascade, Collection, Embeddable, Embedded, Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/sqlite';
 import { CommonEntity } from '@modules/common/common.entity';
 import District from '@modules/district/district.entity';
 import { User } from '@modules/user/user.entity';
+import RentalImage from './rental-image.entity';
 
 export enum RentalType {
 	ROOM,
@@ -112,6 +113,9 @@ export default class Rental extends CommonEntity {
 
 	@Embedded()
 	preferences = new RentalPreferences();
+
+	@OneToMany(() => RentalImage, i => i.rental, { eager: true, cascade: [Cascade.ALL], orphanRemoval: true })
+	images = new Collection<RentalImage>(this);
 
 	constructor(owner: User) {
 		super();

@@ -2,10 +2,10 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { User } from '@modules/user/user.entity';
 import { initORM } from '@orm';
 import { Type } from '@sinclair/typebox';
-import Rental, { RentalDuration, PropertyType, RentalState, RentalTenantPreferredType, RentalType, RentalTenantPreferredOccupation } from './rental.entity';
-import axios from 'axios';
+import Rental, { RentalDuration, PropertyType, RentalState, RentalTenantPreferredType, RentalType, RentalTenantPreferredOccupation, RentalLocation } from './rental.entity';
 import District from '@modules/district/district.entity';
-import { TenantOccupation } from '@modules/tenant/tenant.entity';
+import RentalImage from './rental-image.entity';
+import { Utils } from '@app/utils';
 
 const route: FastifyPluginAsyncTypebox = async app => {
 	const db = await initORM();
@@ -19,11 +19,27 @@ const route: FastifyPluginAsyncTypebox = async app => {
 	}, async (req, res) => {
 		const em = db.em.fork();
 
+		const count = await em.count(Rental, { owner: req.user.id });
+		if (count >= 5) return res.status(401).send('Exceeded rental limit');
+
 		const owner = await em.findOneOrFail(User, req.user.id);
 		const rental = new Rental(owner);
 		await em.persistAndFlush(rental);
 
 		return rental.id;
+	});
+
+	app.get('/self', {
+		onRequest: [app.authenticate],
+		schema: {
+			tags: ['rental'],
+			security: [{ BearerAuth: [] }],
+		}
+	}, async (req, res) => {
+		const em = db.em.fork();
+
+		const rentals = await em.find(Rental, { owner: req.user.id }, { exclude: ['owner.email', 'owner.password'], orderBy: { createdAt: 'DESC' } });
+		return rentals;
 	});
 
 	app.get('/:id', {
@@ -82,7 +98,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 					internet: Type.Optional(Type.Boolean()),
 					shared: Type.Optional(Type.Boolean())
 				})),
-				tenantPreferences: Type.Optional(Type.Object({
+				preferences: Type.Optional(Type.Object({
 					type: Type.Optional(Type.Enum(RentalTenantPreferredType)),
 					occupation: Type.Optional(Type.Enum(RentalTenantPreferredOccupation))
 				}))
@@ -128,12 +144,71 @@ const route: FastifyPluginAsyncTypebox = async app => {
 			// }
 		}
 
-		if (req.body.tenantPreferences != undefined) {
-			if (req.body.tenantPreferences.type != undefined) rental.preferences.type = req.body.tenantPreferences.type;
-			if (req.body.tenantPreferences.occupation != undefined) rental.preferences.occupation = req.body.tenantPreferences.occupation;
+		if (req.body.preferences != undefined) {
+			if (req.body.preferences.type != undefined) rental.preferences.type = req.body.preferences.type;
+			if (req.body.preferences.occupation != undefined) rental.preferences.occupation = req.body.preferences.occupation;
 		}
 
 		await em.persistAndFlush(rental);
+		return rental;
+	});
+
+	app.post('/image/:id', {
+		onRequest: [app.authenticate],
+		schema: {
+			tags: ['rental'],
+			security: [{ BearerAuth: [] }],
+			description: 'Upload an image for a rental',
+			params: Type.Object({ id: Type.Number() })
+		}
+	}, async (req, res) => {
+		const em = db.em.fork();
+
+		const data = await req.file();
+		if (!data) return res.status(404).send({ message: 'File missing' });
+
+		const rental = await em.findOneOrFail(Rental, req.params.id);
+		if (rental.owner.id != req.user.id) return res.status(403).send({ message: 'Unauthorized' });
+		if (rental.images.length > 5) return res.status(400).send({ message: 'Exceeded image limit' });
+		const priority = rental.images.length + 1;
+		
+		const url = await Utils.uploadFile(data, `/rental/${req.params.id}`);
+		const image = new RentalImage(rental, priority, url);
+		rental.images.add(image);
+		await em.persistAndFlush(rental);
+
+		return rental;
+	});
+
+	app.delete('/image/:id/:imageId', {
+		onRequest: [app.authenticate],
+		schema: {
+			tags: ['rental'],
+			security: [{ BearerAuth: [] }],
+			description: 'Delete image by its ID from rental',
+			params: Type.Object({
+				id: Type.Number(),
+				imageId: Type.Number()
+			})
+		}
+	}, async (req, res) => {
+		const em = db.em.fork();
+
+		const rental = await em.findOneOrFail(Rental, req.params.id);
+		if (rental.owner.id != req.user.id) return res.status(403).send({ message: 'Unauthorized' });
+
+		const image = rental.images.find(i => i.id == req.params.imageId);
+		if (image) {
+			await Utils.deleteFile(image.imageUrl);
+			rental.images.remove(image);
+
+			rental.images
+				.filter(img => img.priority > image.priority)
+				.sort((a, b) => a.priority - b.priority)
+				.forEach(img => img.priority--);
+			await em.persistAndFlush(rental);
+		}
+
 		return rental;
 	});
 }
