@@ -2,7 +2,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { User } from '@modules/user/user.entity';
 import { initORM } from '@orm';
 import { Type } from '@sinclair/typebox';
-import Rental, { RentalDuration, PropertyType, RentalState, RentalTenantPreferredType, RentalType, RentalTenantPreferredOccupation, RentalLocation } from './rental.entity';
+import Rental, { RentalDuration, PropertyType, RentalState, RentalTenantPreferredType, RentalType, RentalTenantPreferredOccupation } from './rental.entity';
 import District from '@modules/district/district.entity';
 import RentalImage from './rental-image.entity';
 import { Utils } from '@app/utils';

@@ -18,7 +18,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
-		const tenant = await em.findOneOrFail(Tenant, { user: req.params.id, state: TenantState.ACTIVE }, { populate: ['user', 'districts'], exclude: ['user.email', 'user.password'] });
+		const tenant = await em.findOneOrFail(Tenant, { user: req.params.id }, { populate: ['user', 'districts'], exclude: ['user.email', 'user.password'] });
 		return tenant;
 	})
 
