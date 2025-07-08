@@ -10,6 +10,18 @@ import { RentalType } from '@modules/rental/rental.entity';
 const route: FastifyPluginAsyncTypebox = async app => {
 	const db = await initORM();
 
+	app.get('/:id', {
+		schema: {
+			tags: ['tenant'],
+			description: "Fetch a tenant by their ID.",
+			params: Type.Object({ id: Type.Number() })
+		}
+	}, async (req, res) => {
+		const em = db.em.fork();
+		const tenant = await em.findOneOrFail(Tenant, { user: req.params.id, state: TenantState.ACTIVE }, { populate: ['user', 'districts'], exclude: ['user.email', 'user.password'] });
+		return tenant;
+	})
+
 	app.get('/self', {
 		onRequest: [app.authenticate],
 		schema: {

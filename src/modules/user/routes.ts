@@ -18,6 +18,24 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		return await em.findOneOrFail(User, req.user.id, { exclude });
 	});
 
+	app.get('/phonenumber/:id', {
+		onRequest: [app.authenticate],
+		schema: {
+			tags: ['user'],
+			description: "Attempt to fetch a user's phone number provided the logged in user is a subscribed member",
+			security: [{ BearerAuth: [] }],
+			params: Type.Object({ id: Type.Number() })
+		}
+	}, async (req, res) => {
+		const em = db.em.fork();
+		const self = await em.findOneOrFail(User, req.user.id);
+		// TODO: Check if self is a subscribed member before attempting to get phone number
+		if (!self) return res.status(403).send({ message: 'Not a subscribed member' });
+
+		const user = await em.findOneOrFail(User, req.params.id);
+		return user.phone;
+	});
+
 	app.put('', {
 		onRequest: [app.authenticate],
 		schema: {

@@ -24,4 +24,11 @@ export namespace Utils {
 		const filepath = path.join(process.cwd(), url);
 		await promises.unlink(filepath);
 	}
+
+	/** Delete a folder in the filesystem with the provided url */
+	export async function deleteFolder(url: string) {
+		const filepath = path.join(process.cwd(), url);
+		const stat = await promises.stat(filepath);
+		if (stat.isDirectory()) await promises.rm(filepath, { recursive: true, force: true });
+	}
 }

@@ -20,7 +20,7 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		const em = db.em.fork();
 
 		const count = await em.count(Rental, { owner: req.user.id });
-		if (count >= 5) return res.status(401).send('Exceeded rental limit');
+		if (count >= 3) return res.status(401).send('Exceeded rental limit');
 
 		const owner = await em.findOneOrFail(User, req.user.id);
 		const rental = new Rental(owner);
@@ -54,6 +54,19 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		const rental = await em.findOneOrFail(Rental, req.params.id, { exclude: ['owner.email', 'owner.password'] });
 		return rental;
 	});
+
+	app.delete('/:id', {
+		schema: {
+			tags: ['rental'],
+			security: [{ BearerAuth: [] }],
+			params: Type.Object({ id: Type.Number() })
+		}
+	}, async (req, res) => {
+		const em = db.em.fork();
+		const rental = await em.findOneOrFail(Rental, req.params.id);
+		await Utils.deleteFolder(`/uploads/images/rental/${req.params.id}`);
+		await em.removeAndFlush(rental);
+	})
 
 	app.get('/recent', {
 		schema: {
