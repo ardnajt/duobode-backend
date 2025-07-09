@@ -31,7 +31,9 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
+		
 		const tenant = await em.findOne(Tenant, { user: req.user.id }, { populate: ['user', 'districts'], exclude: ['user.email', 'user.password'] });
+
 		if (tenant) return tenant;
 		else {
 			const user = await em.findOneOrFail(User, req.user.id);
@@ -42,10 +44,45 @@ const route: FastifyPluginAsyncTypebox = async app => {
 	app.get('', {
 		schema: {
 			tags: ['tenant'],
+			description: "Returns 10 tenants based on the provided filter",
+			querystring: Type.Object({
+				page: Type.Optional(Type.Number({ default: 1 })),
+				types: Type.Optional(Type.Array(Type.Number())),
+				occupations: Type.Optional(Type.Array(Type.Number())),
+				districts: Type.Optional(Type.Array(Type.Number())),
+				min: Type.Optional(Type.Number()),
+				max: Type.Optional(Type.Number())
+			})
 		}
 	}, async (req, res) => {
+		if (!req.query.page) req.query.page = 1;
+
 		const em = db.em.fork();
-		return await em.find(Tenant, {}, { populate: ['user', 'districts'], exclude: ['user.email', 'user.password'] });
+		const limit = 10;
+
+		const qb = em.createQueryBuilder(Tenant, 't')
+			.leftJoin('t.districts', 'd')
+			.where({ state: TenantState.ACTIVE })
+			.limit(limit)
+			.offset((req.query.page - 1) * limit)
+			.orderBy({ createdAt: 'desc' });
+
+		if (req.query.types) qb.andWhere({ type: { $in: req.query.types }});
+		if (req.query.occupations) qb.andWhere({ occupation: { $in: req.query.occupations } });
+		if (req.query.districts) qb.andWhere({ 'd.id': { $in: req.query.districts }});
+		if (req.query.min) qb.andWhere({ budget: { $gte: req.query.min } });
+		if (req.query.max) qb.andWhere({ budget: { $lte: req.query.max } });
+
+		const clone = qb.clone();
+		const count = await qb.getCount();
+
+		clone
+			.limit(limit)
+			.offset((req.query.page - 1) * limit);
+
+		const tenants = await clone.getResult();
+		await em.populate(tenants, ['user', 'districts'], { exclude: ['user.email', 'user.password'] });
+		return { count, tenants };
 	});
 
 	app.get('/recent', {

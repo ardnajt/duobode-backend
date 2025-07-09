@@ -2,6 +2,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { initORM } from '@orm';
 import District from './district.entity';
 import { Type } from '@sinclair/typebox';
+import { FilterQuery } from '@mikro-orm/sqlite';
 
 const route: FastifyPluginAsyncTypebox = async (app) => {
 	const db = await initORM();
@@ -13,7 +14,11 @@ const route: FastifyPluginAsyncTypebox = async (app) => {
 		}
 	}, async (req, res) => {
 		const em = db.em.fork();
-		return await em.find(District, { region: req.query.region });
+		
+		const where: FilterQuery<District> = {};
+		if (req.query.region) where.region = req.query.region;
+
+		return await em.find(District, where);
 	});
 }
 
