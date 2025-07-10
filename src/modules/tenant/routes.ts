@@ -70,8 +70,8 @@ const route: FastifyPluginAsyncTypebox = async app => {
 		if (req.query.types) qb.andWhere({ type: { $in: req.query.types }});
 		if (req.query.occupations) qb.andWhere({ occupation: { $in: req.query.occupations } });
 		if (req.query.districts) qb.andWhere({ 'd.id': { $in: req.query.districts }});
-		if (req.query.min) qb.andWhere({ budget: { $gte: req.query.min } });
-		if (req.query.max) qb.andWhere({ budget: { $lte: req.query.max } });
+		if (req.query.min != undefined) qb.andWhere({ budget: { $gte: req.query.min } });
+		if (req.query.max != undefined) qb.andWhere({ budget: { $lte: req.query.max } });
 
 		const clone = qb.clone();
 		const count = await qb.getCount();

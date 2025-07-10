@@ -6,9 +6,69 @@ import Rental, { RentalDuration, PropertyType, RentalState, RentalTenantPreferre
 import District from '@modules/district/district.entity';
 import RentalImage from './rental-image.entity';
 import { Utils } from '@app/utils';
+import { FilterQuery, FilterValue } from '@mikro-orm/sqlite';
 
 const route: FastifyPluginAsyncTypebox = async app => {
 	const db = await initORM();
+
+	app.get('', {
+		schema: {
+			tags: ['rental'],
+			description: "Returns 10 rentals based on the provided filter",
+			querystring: Type.Object({
+				type: Type.Enum(RentalType, { examples: Object.values(RentalType).filter(r => typeof r == 'number') }),
+				page: Type.Optional(Type.Number({ default: 1 })),
+				gender: Type.Optional(Type.Array(Type.Number())),
+				durations: Type.Optional(Type.Array(Type.Number())),
+				pax: Type.Optional(Type.Array(Type.Number())),
+				furnished: Type.Optional(Type.Array(Type.Boolean())),
+				shared: Type.Optional(Type.Array(Type.Boolean())),
+				properties: Type.Optional(Type.Array(Type.Number())),
+				districts: Type.Optional(Type.Array(Type.Number())),
+				min: Type.Optional(Type.Number()),
+				max: Type.Optional(Type.Number())
+			})
+		}
+	}, async (req, res) => {
+		if (!req.query.page) req.query.page = 1;
+
+		const em = db.em.fork();
+		const limit = 10;
+
+		const where: FilterQuery<Rental> = { state: RentalState.ACTIVE, type: req.query.type };
+		if (req.query.durations) where.duration = { $in: req.query.durations };
+		if (req.query.pax) where.pax = { $in: req.query.pax };
+		if (req.query.properties) where.property = { $in: req.query.properties };
+		if (req.query.districts) where.location = { district: { id: { $in: req.query.districts } } };
+
+		// Filtering specifically for preferences
+		const preferences: Record<any, any> = {};
+		if (req.query.gender) preferences.type = { $in: req.query.gender };
+		if (Object.keys(preferences).length != 0) where.preferences = preferences;
+		
+		// Filtering specifically for features
+		const features: Record<any, any> = {};
+		if (req.query.furnished) features.furnished = { $in: req.query.furnished } ;
+		if (req.query.shared && req.query.type != RentalType.PROPERTY) features.shared = { $in: req.query.shared };
+		if (Object.keys(features).length != 0) where.features = features;
+
+		const rent: FilterValue<number> = {
+			$gte: req.query.min,
+			$lte: req.query.max
+		};
+		if (req.query.min == undefined) delete rent.$gte;
+		if (req.query.max == undefined) delete rent.$lte;
+
+		const count = await em.count(Rental, where);
+
+		const rentals = await em.find(Rental, where, {
+			limit,
+			offset: (req.query.page - 1) * limit,
+			orderBy: { createdAt: 'desc' },
+		});
+
+		return { count, rentals };
+	});
 
 	app.post('', {
 		onRequest: [app.authenticate],
